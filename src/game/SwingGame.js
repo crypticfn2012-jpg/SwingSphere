@@ -27,7 +27,7 @@ export class SwingGame{
   }
   setFrameRate(fps){this.maxFPS=Number(fps)||0;}
   bind(){window.addEventListener('keydown',this.onKey);window.addEventListener('keyup',this.onKeyUp);this.canvas.addEventListener('pointermove',this.onMove);this.canvas.addEventListener('pointerdown',this.onDown);window.addEventListener('pointerup',this.onUp);this.canvas.addEventListener('contextmenu',this.onContext);window.addEventListener('resize',()=>this.resize());}
-  key(e,down){if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();this.keys[e.code]=down;if(down&&!e.repeat){if(e.code==='KeyR'){this.restart();this.cb.onRestart?.();}if(e.code==='Escape')this.cb.onPause?.();if(e.code==='Space')this.jump();}}
+  key(e,down){if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();this.keys[e.code]=down;if(down&&!e.repeat){if(e.code==='KeyR'&&this.canRestart){this.restart();this.cb.onRestart?.();}if(e.code==='Escape'&&this.canRestart)this.cb.onPause?.();if(e.code==='Space')this.jump();}}
   pointer(e){const r=this.canvas.getBoundingClientRect();const sensitivity=this.sensitivity||1;this.mouse.x=clamp((((e.clientX-r.left)/r.width)*2-1)*sensitivity,-1,1);this.mouse.y=clamp((-((e.clientY-r.top)/r.height)*2+1)*sensitivity,-1,1);}
   pointerDown(e){if(e.button!==0)return;this.pointer(e);this.attach();}
   resize(){if(!this.renderer)return;this.camera.aspect=innerWidth/innerHeight;this.camera.updateProjectionMatrix();this.renderer.setSize(innerWidth,innerHeight);this.renderer.setPixelRatio(Math.min(devicePixelRatio,this.quality==='low'?1:1.7));}
