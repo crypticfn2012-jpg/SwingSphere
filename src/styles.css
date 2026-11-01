@@ -228,3 +228,34 @@ button:disabled{opacity:.32;cursor:not-allowed}
  .menu-stat small{width:100%;font-size:7px}
  .menu-stat strong{font-size:13px}
 }
+
+.title-screen{background:#e9e7df;color:#202820;padding:clamp(20px,4vw,48px)}
+.title-header{padding-bottom:18px;border-bottom:1px solid #c9c9bd}
+.game-logo{font-size:25px;letter-spacing:-1.5px;color:#202820;font-weight:900}
+.game-logo span{color:#4f7966}.game-logo small{font-size:8px;letter-spacing:2px;color:#77796f;margin-left:13px}
+.title-nav{gap:5px}.title-nav button{background:transparent;border:0;border-radius:3px;padding:10px 12px;color:#51574e;font-size:9px;letter-spacing:1.2px}
+.title-nav button:hover{background:#d9ddd3;color:#202820;border:0}
+.menu-layout{width:min(1050px,100%);margin:auto;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(220px,.6fr);gap:clamp(35px,8vw,110px);align-items:center;flex:1}
+.menu-copy{padding:35px 0;text-align:left;max-width:650px}.menu-copy .title-kicker{color:#66816b;font-size:9px;letter-spacing:2.1px}
+.menu-copy h1{color:#202820;font-size:clamp(62px,9.2vw,112px);line-height:.83;letter-spacing:-8px;font-weight:900;margin:24px 0 20px}
+.menu-copy h1 span{color:#64816b}.menu-copy .title-subtitle{color:#666b61;font-size:14px;line-height:1.7;max-width:390px;margin:0 0 30px}
+.menu-copy .title-buttons{justify-content:flex-start;gap:9px}.menu-copy .play-button{min-width:170px;min-height:52px;border-radius:3px;padding:0 17px;font-size:10px;letter-spacing:1.2px;box-shadow:none}
+.story-button{background:#52745f;color:#fff}.story-button:hover{background:#42634f}
+.endless-button{background:transparent;color:#30392f;border:1px solid #aeb3a7}.endless-button:hover{background:#dce0d6}
+.menu-progress{margin-top:45px;width:min(380px,100%)}.menu-progress-head{font-size:9px;color:#666b61;letter-spacing:1.2px}.menu-progress-head b{color:#52745f}
+.menu-progress-track{height:3px;background:#d0d2c8;border-radius:0}.menu-progress-track i{background:#52745f}.menu-progress>small{color:#77796f;font-size:8px;letter-spacing:1.2px}
+.menu-side{width:100%;border-left:1px solid #c9c9bd;padding:12px 0 12px 28px;align-self:center}
+.menu-side-label{font-size:9px;letter-spacing:2px;color:#778071;font-weight:900;margin-bottom:22px}
+.menu-record{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid #d1d1c7}
+.menu-record span{font-size:9px;letter-spacing:1px;color:#77796f;font-weight:700}
+.menu-record strong{font-size:22px;letter-spacing:-1px;color:#263329;font-variant-numeric:tabular-nums}
+.menu-record strong small{font-size:10px;color:#7c8176;margin-left:3px}
+.menu-side-foot{margin-top:25px;color:#66816b;font-size:8px;letter-spacing:1.3px;font-weight:900}
+.menu-side-foot span{display:block;color:#73766d;font-size:11px;letter-spacing:0;font-weight:400;line-height:1.5;margin-top:7px}
+.title-footer{border-top:1px solid #c9c9bd;padding-top:13px;color:#85877e;font-size:8px;letter-spacing:1.2px}
+@media(max-width:760px){.menu-layout{grid-template-columns:1fr;gap:12px;align-content:center}.menu-copy{padding:28px 0 10px}.menu-copy h1{font-size:clamp(58px,15vw,88px);letter-spacing:-5px;margin:18px 0}
+.menu-side{border-left:0;border-top:1px solid #c9c9bd;padding:15px 0 0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.menu-side-label,.menu-side-foot{grid-column:1/-1;margin:0}.menu-side-label{margin-bottom:4px}.menu-record{display:block;border:0;padding:5px 0}.menu-record strong{display:block;font-size:18px;margin-top:5px}.menu-side-foot{margin-top:8px}}
+@media(max-width:520px){.title-header{align-items:flex-start;flex-direction:column}.title-nav{width:100%;justify-content:space-between}.title-nav button{padding:8px 5px;font-size:8px}
+.menu-copy .title-subtitle{max-width:310px;font-size:12px}.menu-copy .title-buttons{width:100%}.menu-copy .play-button{min-width:0;flex:1}
+.menu-side{grid-template-columns:repeat(3,minmax(0,1fr))}.menu-record span{font-size:7px}.menu-record strong{font-size:16px}.title-footer{font-size:7px}}
