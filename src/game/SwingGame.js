@@ -52,7 +52,7 @@ export class SwingGame {
   }
   pointerWorld(e){
     const rect=this.canvas.getBoundingClientRect(),sx=e.clientX-rect.left,sy=e.clientY-rect.top;
-    return {x:this.cameraX+(sx-this.width*.38)/this.scale,y:this.cameraY+(this.height*.62-sy)/this.scale};
+    return {x:this.cameraX+sx/this.scale,y:this.cameraY+(this.height*.62-sy)/this.scale};
   }
   pointerMove(e){this.pointer.x=e.clientX;this.pointer.y=e.clientY;if(this.pointer.down&&this.rope)this.pointerWorldCache=this.pointerWorld(e);}
   pointerDown(e){
@@ -112,7 +112,7 @@ export class SwingGame {
   resetPlayer(){
     this.player={x:0,y:1.05,vx:0,vy:0,r:.58,rot:0};
     this.elapsed=0;this.distance=0;this.maxHeight=1.05;this.dead=false;this.completed=false;this.ground=false;
-    this.cameraX=-8;this.cameraY=4;this.rope=null;this.particles=[];this.trailClock=0;this.lastHud=0;this.lavaY=this.mode==='lava'?-8:-100;
+    this.cameraX=-this.width/this.scale*.38;this.cameraY=4;this.rope=null;this.particles=[];this.trailClock=0;this.lastHud=0;this.lavaY=this.mode==='lava'?-8:-100;
     this.pointer.down=false;this.cb.onRunStart?.();
   }
   restart(){if(this.mode==='levels')this.buildLevel(this.levelIndex);else if(this.mode==='endless')this.buildEndless();else this.buildLava();}
@@ -127,7 +127,7 @@ export class SwingGame {
     if(this.keys.KeyW||this.keys.ArrowUp)p.vy+=4*dt;
     if(this.keys.KeyS||this.keys.ArrowDown)p.vy-=4*dt;
     p.vy-=23*dt;
-    p.vx*=Math.pow(this.ground?.80:.997,dt*60);p.vy*=Math.pow(.999,dt*60);
+    p.vx*=Math.pow(this.ground ? .80 : .997,dt*60);p.vy*=Math.pow(.999,dt*60);
     p.vx=clamp(p.vx,-25,25);p.vy=clamp(p.vy,-28,19);
     p.x+=p.vx*dt;p.y+=p.vy*dt;p.rot+=p.vx*dt*.9;
     this.ground=false;
@@ -167,7 +167,7 @@ export class SwingGame {
     if(this.elapsed-this.lastHud>.08){this.lastHud=this.elapsed;this.cb.onHUD?.({time:this.elapsed,speed:Math.hypot(p.vx,p.vy),distance:this.distance,height:this.maxHeight,mode:this.mode,rope:!!this.rope});}
   }
   get scale(){return Math.min(58,Math.max(34,this.height*.075));}
-  sx(x){return (x-this.cameraX)*this.scale+this.width*.38;}
+  sx(x){return (x-this.cameraX)*this.scale;}
   sy(y){return this.height*.62-(y-this.cameraY)*this.scale;}
   roundRect(x,y,w,h,r,fill,stroke){const c=this.ctx;c.beginPath();c.roundRect(x,y,w,h,r);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=1.5;c.stroke();}}
   draw(){
