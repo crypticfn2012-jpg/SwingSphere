@@ -83,9 +83,9 @@ function locker(){
  setScreen('locker');
  const cards=ITEMS.filter(i=>i.type==='color').map(i=>{
   const owned=save.data.owned.includes(i.id),equipped=save.data.equipped.color===i.id;
-  const lockedByLevel=!!i.unlockLevel&&!owned;
-  const label=owned?(equipped?'EQUIPPED':'EQUIP'):lockedByLevel?'LEVEL '+i.unlockLevel:'SHOP';
-  return '<article class="skin-card '+(lockedByLevel?'skin-locked':'')+'"><span class="skin-preview" style="--skin:#'+i.color.toString(16).padStart(6,'0')+'"></span><strong>'+esc(i.name)+'</strong><small>'+(i.unlockLevel?'STORY REWARD':'BALL SKIN')+'</small><button class="skin-action" data-action="'+(owned?'equip':lockedByLevel?'noop':'shop')+'" data-id="'+i.id+'" '+(lockedByLevel?'disabled':'')+'>'+label+'</button></article>';
+  const lockedByLevel=!!i.unlockLevel&&!owned,dailyLocked=!!i.dailyOnly&&!owned;
+  const label=owned?(equipped?'EQUIPPED':'EQUIP'):lockedByLevel?'LEVEL '+i.unlockLevel:dailyLocked?'30 MIN DAILY':'SHOP';
+  return '<article class="skin-card '+(lockedByLevel?'skin-locked':'')+'"><span class="skin-preview" style="--skin:#'+i.color.toString(16).padStart(6,'0')+'"></span><strong>'+esc(i.name)+'</strong><small>'+(i.unlockLevel?'STORY REWARD':'BALL SKIN')+'</small><button class="skin-action" data-action="'+(owned?'equip':(lockedByLevel||dailyLocked)?'noop':'shop')+'" data-id="'+i.id+'" '+((lockedByLevel||dailyLocked)?'disabled':'')+'>'+label+'</button></article>';
  }).join('');
  app.innerHTML='<section class="screen sub-screen"><div class="sub-top"><button class="back-button" data-action="menu">← BACK</button><div class="sub-heading"><small>YOUR COLLECTION</small><h2>BALL SKINS</h2><p>'+save.data.owned.filter(id=>ITEMS.some(i=>i.id===id)).length+' / '+ITEMS.length+' unlocked</p></div><div class="coin-balance">✦ '+save.data.coins+'</div></div><div class="skin-grid">'+cards+'</div></section>';
 }
