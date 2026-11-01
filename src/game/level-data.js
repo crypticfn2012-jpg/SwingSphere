@@ -23,13 +23,13 @@ export const LEVELS = Array.from({length:100},(_,index)=>{
   if(index<BASE_LEVELS.length)return BASE_LEVELS[index];
   const chapter=Math.floor(index/10);
   const template=BASE_LEVELS[index%BASE_LEVELS.length];
-  const stretch=1+(chapter*.007);
+  const stretch=1;
   const lift=(chapter%3)*.12;
   const platforms=template.platforms.map((p,j)=>{
     const q=[...p];
     q[1]+=j===0?0:Math.sin((index+1)*.73+j*1.9)*lift;
     q[2]*=stretch;
-    q[5]=Math.max(5,p[5]-chapter*.045);
+    q[5]=p[5];
     return q;
   });
   const targets=template.targets.map((p,j)=>{
@@ -41,7 +41,7 @@ export const LEVELS = Array.from({length:100},(_,index)=>{
   const obstacles=template.obstacles.map((p,j)=>{
     const q=[...p];
     q[2]*=stretch;
-    q[3]=Math.min(5,p[3]+chapter*.08);
+    q[3]=p[3];
     return q;
   });
   const difficulty=chapter<2?'EASY':chapter<4?'MEDIUM':chapter<7?'HARD':'EXPERT';
