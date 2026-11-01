@@ -18,7 +18,7 @@ function toast(message,good=false){const el=document.createElement('div');el.cla
 function stars(n){return '<span class="stars">'+('★'.repeat(n))+('☆'.repeat(3-n))+'</span>';}
 function profile(){const pct=Math.min(100,save.data.xp/save.getLevel()*100);return '<div class="profile"><span>◉</span><span>PLAYER <b>'+save.data.level+'</b><div class="bar" style="width:86px;height:4px;margin-top:5px"><i style="width:'+pct+'%"></i></div></span><span class="muted">LVL</span></div>';}
 function currency(){return '<div class="currency">✦ <b>'+save.data.coins.toLocaleString()+'</b> <small>SWINGCOINS</small></div>';}
-function setScreen(name){screen=name;platform.gameplayStop();if(game)game.pause();app.innerHTML='';}
+function setScreen(name){screen=name;platform.gameplayStop();if(game){game.pause();game.canRestart=false;}app.innerHTML='';}
 function menu(){
  setScreen('menu');app.innerHTML='<section class="screen"><header class="topbar"><div class="brand">SWING<span>SPHERE</span></div><div style="display:flex;gap:10px;align-items:center">'+profile()+currency()+'<button class="nav-btn" data-action="settings">⚙</button></div></header><main class="menu-main"><div class="hero-copy"><div class="eyebrow">GRAVITY IS YOUR PLAYGROUND</div><h1>GRAB.<br><em>SWING.</em><br>FLY.</h1><p>Hook onto the cubes, build insane momentum and master the sky. How far can you swing?</p><button class="primary" data-action="play">PLAY NOW&nbsp; →</button><div class="menu-actions"><button class="secondary" data-action="levels">LEVELS</button><button class="secondary" data-action="endless">ENDLESS SWING</button><button class="secondary" data-action="lava">FLOOR IS LAVA</button></div></div><div class="orb-preview"><div class="orb-ring"></div><div class="orb-ring r2"></div><div class="orb"></div></div></main><nav class="bottom-nav"><button class="nav-btn" data-action="locker">◈ LOCKER</button><button class="nav-btn" data-action="shop">✦ SHOP</button><button class="nav-btn" data-action="achievements">★ ACHIEVEMENTS</button><button class="nav-btn" data-action="leaderboards">♜ LEADERBOARDS</button><button class="nav-btn" data-action="daily">▣ DAILY REWARD</button><button class="nav-btn" data-action="playtime">◷ PLAYTIME</button></nav><div style="display:flex;justify-content:space-between;margin-top:18px;color:#7887a8;font-size:11px"><span>SWINGSPHERE · SEASON 1</span><span>WASD MOVE · SPACE JUMP · HOLD CLICK TO GRAPPLE</span></div></section>';
 }
@@ -61,7 +61,7 @@ function modal(title,description,actions){
 }
 function pause(){if(game?.paused&&document.querySelector('.modal-screen'))return;game?.pause();platform.gameplayStop();modal('PAUSED','Take a breather. Your run is waiting.', '<button class="primary" data-action="resume">RESUME</button><button class="secondary" data-action="restart">RESTART</button><button class="secondary" data-action="menu">MAIN MENU</button>');}
 function start(mode,index=0){
- activeMode=mode;if(mode==='levels')game.buildLevel(index);else if(mode==='endless')game.buildEndless();else game.buildLava();
+ activeMode=mode;game.canRestart=true;if(mode==='levels')game.buildLevel(index);else if(mode==='endless')game.buildEndless();else game.buildLava();
  hud();screen='game';game.resume();platform.gameplayStart();
 }
 function finishLevel(result){
