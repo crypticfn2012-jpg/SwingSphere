@@ -54,7 +54,7 @@ export class SwingGame {
     const rect=this.canvas.getBoundingClientRect(),sx=e.clientX-rect.left,sy=e.clientY-rect.top;
     return {x:this.cameraX+sx/this.scale,y:this.cameraY+(this.height*.62-sy)/this.scale};
   }
-  pointerMove(e){this.pointer.x=e.clientX;this.pointer.y=e.clientY;if(this.pointer.down&&this.rope)this.pointerWorldCache=this.pointerWorld(e);}
+  pointerMove(e){this.pointer.x=e.clientX;this.pointer.y=e.clientY;this.pointerWorldCache=this.pointerWorld(e);}
   pointerDown(e){
     if(e.button!==0&&e.pointerType!=='touch')return;
     this.pointer.down=true;this.canvas.setPointerCapture?.(e.pointerId);this.pointerWorldCache=this.pointerWorld(e);
@@ -185,7 +185,7 @@ export class SwingGame {
       c.fillStyle='#8deaff';for(let k=0;k<Math.min(6,Math.floor(pw/35));k++)c.fillRect(x+14+k*35,y+4,12,2);
     }
     for(const hzd of this.hazards){if(!visible(hzd.x))continue;const x=this.sx(hzd.x),y=this.sy(hzd.y),r=hzd.r*s;c.save();c.shadowBlur=18;c.shadowColor='#ff4e77';c.strokeStyle='#ff6687';c.lineWidth=7;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.stroke();c.shadowBlur=0;c.strokeStyle='#ffc0ce';c.lineWidth=2;c.beginPath();c.arc(x,y,r-5,0,Math.PI*2);c.stroke();c.restore();}
-    for(const t of this.targets){if(!visible(t.x))continue;const x=this.sx(t.x),y=this.sy(t.y),pulse=1+Math.sin(this.elapsed*4+t.phase)*.12,col=t.type==='boost'?'#ffd16a':t.type==='limited'?'#ff80bc':'#61efff';c.save();c.translate(x,y);c.scale(pulse,pulse);c.shadowBlur=26;c.shadowColor=col;c.strokeStyle=col;c.lineWidth=3;c.beginPath();c.arc(0,0,15,0,Math.PI*2);c.stroke();c.fillStyle=col;c.globalAlpha=.2;c.beginPath();c.arc(0,0,11,0,Math.PI*2);c.fill();c.globalAlpha=1;c.fillStyle='#efffff';c.beginPath();c.arc(0,0,4,0,Math.PI*2);c.fill();c.restore();}
+    for(const t of this.targets){if(!visible(t.x))continue;const x=this.sx(t.x),y=this.sy(t.y),pulse=1+Math.sin(this.elapsed*4+t.phase)*.12,col=t.type==='boost'?'#ffd16a':t.type==='limited'?'#ff80bc':'#61efff',hovered=this.pointerWorldCache&&Math.hypot(t.x-this.pointerWorldCache.x,t.y-this.pointerWorldCache.y)<1.9;c.save();c.translate(x,y);c.scale(pulse,pulse);c.shadowBlur=hovered?34:26;c.shadowColor=col;c.strokeStyle=hovered?'#ffffff':col;c.lineWidth=hovered?5:3;c.beginPath();c.arc(0,0,hovered?18:15,0,Math.PI*2);c.stroke();c.fillStyle=col;c.globalAlpha=.2;c.beginPath();c.arc(0,0,11,0,Math.PI*2);c.fill();c.globalAlpha=1;c.fillStyle='#efffff';c.beginPath();c.arc(0,0,4,0,Math.PI*2);c.fill();c.restore();}
     if(this.rope){const x1=this.sx(this.player.x),y1=this.sy(this.player.y),x2=this.sx(this.rope.target.x),y2=this.sy(this.rope.target.y);c.save();c.shadowBlur=12;c.shadowColor='#5cecf5';c.strokeStyle='#a2faff';c.lineWidth=3;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();c.restore();}
     for(const q of this.particles){const x=this.sx(q.x),y=this.sy(q.y);c.globalAlpha=clamp(q.life/q.max,0,1);c.fillStyle=q.color;c.beginPath();c.arc(x,y,Math.max(1,4*q.life/q.max),0,Math.PI*2);c.fill();}c.globalAlpha=1;
     this.drawPlayer(c);
