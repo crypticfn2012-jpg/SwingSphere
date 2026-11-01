@@ -12,12 +12,12 @@ export class SwingGame {
     this.keys={};this.targets=[];this.platforms=[];this.hazards=[];this.particles=[];this.stars=[];
     this.elapsed=0;this.distance=0;this.maxHeight=0;this.maxFPS=60;this.quality='high';
     this.sensitivity=1;this.cameraShake=false;this.cameraDistance=8;this.baseFov=75;
-    this.pointer={x:0,y:0,down:false};this.rope=null;this.trailKind='default';this.cosmetic={color:0x52e3ed,shape:'sphere'};
-    this.lastTime=0;this.lastRender=0;this.lastHud=0;this.raf=0;this.accumulator=0;this.ground=false;
+    this.pointer={x:0,y:0,down:false};this.rope=null;this.trailKind='default';this.cosmetic={color:0x55d9e7,shape:'sphere'};
+    this.lastTime=0;this.lastRender=0;this.lastHud=0;this.raf=0;this.pauseNeedsDraw=false;this.accumulator=0;this.ground=false;
     this.onKey=e=>this.key(e,true);this.onKeyUp=e=>this.key(e,false);
     this.onPointerMove=e=>this.pointerMove(e);this.onPointerDown=e=>this.pointerDown(e);
     this.onPointerUp=e=>this.pointerUp(e);this.onContext=e=>e.preventDefault();
-    this.onResize=()=>this.resize();
+    this.onResize=()=>{this.resize();if(this.paused)this.pauseNeedsDraw=true;};
   }
   async init(){
     this.resize();window.addEventListener('resize',this.onResize);
@@ -37,7 +37,7 @@ export class SwingGame {
   applyQuality(q){this.quality=q;this.resize();}
   setCosmetic(item){
     if(!item)return;
-    if(item.type==='color'){this.cosmetic.color=item.color||0x52e3ed;this.cosmetic.rainbow=item.id==='color-rainbow';}
+    if(item.type==='color'){this.cosmetic.color=item.color||0x55d9e7;this.cosmetic.rainbow=item.id==='color-rainbow';if(this.paused)this.pauseNeedsDraw=true;}
     if(item.type==='shape')this.cosmetic.shape=item.id.replace('shape-','');
     if(item.type==='trail')this.trailKind=item.id.replace('trail-','');
   }
@@ -267,12 +267,12 @@ export class SwingGame {
     if(!this.running)return;
     const raw=Math.min(.05,Math.max(0,(now-this.lastTime)/1000||0));this.lastTime=now;this.accumulator=(this.accumulator||0)+raw;
     const fps=this.maxFPS;if(!this.paused&&(!fps||!this.lastRender||now-this.lastRender>=1000/fps)){const dt=Math.min(.05,this.accumulator);this.accumulator=0;this.update(dt);this.draw();this.lastRender=now;}
-    else if(this.paused)this.draw();
+    else if(this.paused&&this.pauseNeedsDraw){this.draw();this.pauseNeedsDraw=false;}
     this.raf=requestAnimationFrame(t=>this.animate(t));
   }
   complete(){if(this.completed||this.dead)return;this.completed=true;this.cb.onComplete?.({level:this.levelIndex,time:this.elapsed,distance:this.distance});}
   fail(){if(this.dead||this.completed)return;this.dead=true;this.cb.onFail?.({mode:this.mode,distance:this.distance,height:this.maxHeight});}
-  pause(){this.paused=true;}
-  resume(){this.paused=false;this.lastTime=performance.now();this.lastRender=0;}
+  pause(){this.paused=true;this.pauseNeedsDraw=true;}
+  resume(){this.paused=false;this.pauseNeedsDraw=false;this.lastTime=performance.now();this.lastRender=0;}
   destroy(){this.running=false;cancelAnimationFrame(this.raf);window.removeEventListener('resize',this.onResize);window.removeEventListener('keydown',this.onKey);window.removeEventListener('keyup',this.onKeyUp);this.canvas.removeEventListener('pointermove',this.onPointerMove);this.canvas.removeEventListener('pointerdown',this.onPointerDown);window.removeEventListener('pointerup',this.onPointerUp);this.canvas.removeEventListener('contextmenu',this.onContext);}
 }
