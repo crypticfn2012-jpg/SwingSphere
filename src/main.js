@@ -243,7 +243,7 @@ async function boot(){
  }},1000);document.addEventListener('visibilitychange',()=>{if(document.hidden&&screen==='game')pause();});}catch(e){console.error(e);loading.innerHTML='<div class="loading-mark">SWING<span>•</span>SPHERE</div><p>Could not start the 2D game. Please refresh and try again.</p>';}}
 function updateHUD(d){
  const t=$('hud-time');if(t)t.textContent=d.time.toFixed(1);
- const m=$('hud-mode');if(m)m.textContent=d.mode==='levels'?'STORY · '+String(game.levelIndex+1).padStart(2,'0'):'ENDLESS';
+ const m=$('hud-mode');if(m)m.textContent=d.mode==='levels'?'STORY · '+String(game.levelIndex+1).padStart(2,'0')+' · '+(LEVELS[game.levelIndex]?.difficulty||'') :d.mode.toUpperCase();
  const s=$('hud-speed');if(s)s.textContent=Math.floor(d.distance)+'m';
  const r=$('hud-rope');if(r)r.textContent=d.rope?'ROPE ATTACHED · RELEASE TO LAUNCH':d.grappleHeld?'SEARCHING FOR NEXT RING':'HOLD ANYWHERE TO AUTO-GRAPPLE';
 }
