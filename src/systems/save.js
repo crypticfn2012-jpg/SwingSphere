@@ -1,0 +1,17 @@
+const KEY='swingsphere.save.v1';
+const fresh=()=>({version:1,coins:450,xp:0,level:1,owned:['color-default','shape-sphere','trail-default'],equipped:{color:'color-default',shape:'shape-sphere',trail:'trail-default'},levels:{},records:{endless:0,lava:0},achievements:[],daily:{lastClaim:0,streak:0},playtime:{claimed:[],seconds:0},settings:{quality:'high',fps:60,sensitivity:1,cameraDistance:8,cameraShake:true,fov:75,master:0.8,music:0.45,sfx:0.8},stats:{runs:0,swings:0,falls:0,levels:0,distance:0}});
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||0));
+export class SaveManager{
+  constructor(){this.data=this.load();}
+  load(){try{const raw=localStorage.getItem(KEY);if(!raw)return fresh();const parsed=JSON.parse(raw);if(!parsed||typeof parsed!=='object')return fresh();const d={...fresh(),...parsed};d.version=1;d.coins=clamp(d.coins,0,1e9);d.xp=clamp(d.xp,0,1e9);d.level=Math.max(1,Math.floor(clamp(d.level,1,999)));d.owned=Array.isArray(d.owned)?[...new Set(d.owned)]:fresh().owned;d.achievements=Array.isArray(d.achievements)?d.achievements:[];d.levels=d.levels&&typeof d.levels==='object'?d.levels:{};d.settings={...fresh().settings,...(d.settings||{})};return d;}catch(e){console.warn('Save recovery: using a fresh profile',e);return fresh();}}
+  save(){try{localStorage.setItem(KEY,JSON.stringify(this.data));return true;}catch(e){console.warn('Could not save profile',e);return false;}}
+  addCoins(n){this.data.coins=Math.max(0,this.data.coins+Math.floor(n));this.save();}
+  spendCoins(n){n=Math.max(0,Math.floor(n));if(this.data.coins<n)return false;this.data.coins-=n;this.save();return true;}
+  addXP(n){this.data.xp+=Math.max(0,Math.floor(n));let need=100+this.data.level*65;let ups=0;while(this.data.xp>=need&&ups<20){this.data.xp-=need;this.data.level++;this.data.coins+=100;ups++;need=100+this.data.level*65;}this.save();return ups;}
+  own(id){if(this.data.owned.includes(id))return false;this.data.owned.push(id);this.save();return true;}
+  equip(type,id){if(!this.data.owned.includes(id))return false;this.data.equipped[type]=id;this.save();return true;}
+  levelResult(id,time,stars,reward){const old=this.data.levels[id]||{stars:0,best:Infinity};this.data.levels[id]={stars:Math.max(old.stars,stars),best:Math.min(old.best,time)};this.addCoins(reward);this.addXP(80+stars*35);this.data.stats.levels++;this.save();}
+  getLevel(){return 100+this.data.level*65;}
+  reset(){this.data=fresh();this.save();}
+}
+export const defaultProfile=fresh;
