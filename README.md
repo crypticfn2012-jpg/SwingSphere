@@ -25,7 +25,9 @@ The production files are generated in `dist/`. Upload the contents of that folde
 - **Esc** — pause
 
 ## CrazyGames
-The HTML5 SDK v3 is loaded in `index.html`. SDK initialization and lifecycle handling live in `src/platform/crazygames.js`. Global leaderboard IDs and dashboard-side setup must be configured in the CrazyGames Developer Portal before online score submission can be enabled.
+The HTML5 SDK v3 is loaded in `index.html`. SDK initialization, lifecycle, cloud-save helpers and rewarded ads live in `src/platform/crazygames.js`. CrazyGames leaderboards are invitation-only and currently support one board per game. This project submits Total Stars when configured.
+
+To enable client-side score submission, set `VITE_CG_LEADERBOARD_ENCRYPTION_KEY` to the 32-byte base64 encryption key from the game's CrazyGames Developer Portal before building. Do not commit a private server API key. Verify score submissions in the CrazyGames Preview tool.
 
 ## Current implementation notes
 Player progress is saved locally with versioned, validated storage. The game is designed to remain playable when the CrazyGames SDK is unavailable. Cloud save, platform leaderboard submission and rewarded ads are guarded behind SDK capability checks and must be verified in the CrazyGames Preview environment before launch.
