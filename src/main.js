@@ -19,7 +19,7 @@ function profile(){const pct=Math.min(100,save.data.xp/save.getLevel()*100);retu
 function currency(){return '<div class="currency">✦ <b>'+save.data.coins.toLocaleString()+'</b> <small>SWINGCOINS</small></div>';}
 function setScreen(name){screen=name;platform.gameplayStop();if(game){game.pause();game.canRestart=false;}app.innerHTML='';}
 function menu(){
- setScreen('menu');
+ ensureDailyPlaytime();setScreen('menu');
  const best=Math.floor(save.data.records.endless||0),last=Math.floor(save.data.records.lastEndless||0);
  const dailySeconds=save.data.playtime.dailySeconds||0;
  app.innerHTML=`<section class="screen title-screen">
