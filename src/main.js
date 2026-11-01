@@ -22,33 +22,45 @@ function menu(){
  ensureDailyPlaytime();setScreen('menu');
  const best=Math.floor(save.data.records.endless||0),last=Math.floor(save.data.records.lastEndless||0);
  const dailySeconds=save.data.playtime.dailySeconds||0;
+ const completed=Object.keys(save.data.levels).length;
+ const next=Array.from({length:LEVELS.length},(_,i)=>i).find(i=>!save.data.levels[i])??LEVELS.length-1;
+ const pct=Math.round(completed/LEVELS.length*100);
  app.innerHTML=`<section class="screen title-screen">
   <header class="title-header">
-   <div class="game-logo">SWING<span>SPHERE</span></div>
+   <div class="game-logo">SWING<span>SPHERE</span><small> A PHYSICS PLATFORMER</small></div>
    <nav class="title-nav">
-    <button data-action="locker">BALL SKINS</button>
+    <button data-action="locker">LOCKER</button>
     <button data-action="shop">SKIN SHOP</button>
-    <button data-action="playtime">DAILY PLAY</button>
-    <button data-action="settings" aria-label="Settings">⚙</button>
+    <button data-action="playtime">DAILY REWARDS</button>
+    <button data-action="settings" aria-label="Settings">SETTINGS ⚙</button>
    </nav>
   </header>
-  <main class="title-main">
-   <div class="title-kicker">A SMALL GAME ABOUT BIG SWINGS</div>
-   <h1>SWING<span>SPHERE</span></h1>
-   <p class="title-subtitle">Hold. Swing. Let go.</p>
-   <div class="title-buttons">
-    <button class="play-button story-button" data-action="levels"><span>STORY MODE</span><b>↗</b></button>
-    <button class="play-button endless-button" data-action="endless"><span>ENDLESS MODE</span><b>∞</b></button>
+  <main class="menu-layout">
+   <div class="menu-copy">
+    <div class="title-kicker">FIND YOUR MOMENTUM</div>
+    <h1>LET GO.<br><span>FLY FURTHER.</span></h1>
+    <p class="title-subtitle">One ball. One rope. A lot of bad landings.</p>
+    <div class="title-buttons">
+     <button class="play-button story-button" data-action="levels"><span>${completed?'CONTINUE STORY':'START STORY'}</span><b>↗</b></button>
+     <button class="play-button endless-button" data-action="endless"><span>ENDLESS RUN</span><b>∞</b></button>
+    </div>
+    <div class="menu-progress">
+     <div class="menu-progress-head"><span>YOUR STORY</span><b>${completed} / ${LEVELS.length}</b></div>
+     <div class="menu-progress-track"><i style="width:${pct}%"></i></div>
+     <small>${pct}% COMPLETE · NEXT UP: ${esc(LEVELS[next].name.toUpperCase())}</small>
+    </div>
    </div>
-   <div class="best-scores">
-    <div><small>BEST DISTANCE</small><strong>${best}<i>m</i></strong></div>
-    <div><small>LAST RUN</small><strong>${last}<i>m</i></strong></div>
-    <div><small>TODAY PLAYED</small><strong>${Math.floor(dailySeconds/60)}<i>m</i></strong></div>
+   <div class="menu-art" aria-hidden="true">
+    <div class="menu-rope"></div><div class="menu-anchor"></div>
+    <div class="menu-ball"></div>
+    <span class="menu-art-label">HOLD TO GRAPPLE <i>↗</i></span>
    </div>
   </main>
   <footer class="title-footer">
-   <span>CLICK AND HOLD NEAR A RING TO SWING</span>
-   <span>100 STORY LEVELS <b>·</b> 10 SKIN REWARDS</span>
+   <div class="menu-stat"><small>ENDLESS BEST</small><strong>${best}<i>m</i></strong></div>
+   <div class="menu-stat"><small>LAST RUN</small><strong>${last}<i>m</i></strong></div>
+   <div class="menu-stat"><small>PLAYED TODAY</small><strong>${Math.floor(dailySeconds/60)}<i>min</i></strong></div>
+   <div class="menu-hint">HOLD ANYWHERE TO AUTO-GRAPPLE THE NEAREST RING</div>
   </footer>
  </section>`;
 }
@@ -106,10 +118,10 @@ function daily(){
 }
 function settings(){
  setScreen('settings');const s=save.data.settings;
- app.innerHTML='<section class="screen"><div class="panel panel-wrap"><div class="panel-head"><div><div class="eyebrow">TUNE YOUR EXPERIENCE</div><h2>Settings</h2></div><button class="secondary" data-action="menu">✕</button></div><div class="setting-row"><span>Graphics quality</span><select data-setting="quality"><option '+(s.quality==='low'?'selected':'')+'>low</option><option '+(s.quality==='medium'?'selected':'')+'>medium</option><option '+(s.quality==='high'?'selected':'')+'>high</option><option '+(s.quality==='ultra'?'selected':'')+'>ultra</option></select></div><div class="setting-row"><span>Frame rate cap</span><select data-setting="fps"><option value="30">30 FPS</option><option value="60" '+(s.fps===60?'selected':'')+'>60 FPS</option><option value="120" '+(s.fps===120?'selected':'')+'>120 FPS</option><option value="0" '+(s.fps===0?'selected':'')+'>Unlimited</option></select></div>'+[['sensitivity','Grapple aim assist',.5,2,.1],['cameraDistance','Camera zoom',5,14,1],['master','Master volume',0,1,.05],['music','Music volume',0,1,.05],['sfx','SFX volume',0,1,.05]].map(x=>'<div class="setting-row"><label for="set-'+x[0]+'">'+x[1]+'</label><input id="set-'+x[0]+'" type="range" min="'+x[2]+'" max="'+x[3]+'" step="'+x[4]+'" value="'+s[x[0]]+'" data-setting="'+x[0]+'"></div>').join('')+'<div class="setting-row"><span>Camera shake</span><input type="checkbox" data-setting="cameraShake" '+(s.cameraShake?'checked':'')+'></div><div class="setting-row"><span>Display</span><button class="small-btn" data-action="fullscreen">TOGGLE FULLSCREEN</button></div><div class="menu-actions"><button class="secondary" data-action="reset-settings">RESTORE DEFAULTS</button><button class="primary" data-action="menu">DONE</button></div></div></section>';
+ app.innerHTML='<section class="screen"><div class="panel panel-wrap"><div class="panel-head"><div><div class="eyebrow">TUNE YOUR EXPERIENCE</div><h2>Settings</h2></div><button class="secondary" data-action="menu">✕</button></div><div class="setting-row"><span>Graphics quality</span><select data-setting="quality"><option '+(s.quality==='low'?'selected':'')+'>low</option><option '+(s.quality==='medium'?'selected':'')+'>medium</option><option '+(s.quality==='high'?'selected':'')+'>high</option><option '+(s.quality==='ultra'?'selected':'')+'>ultra</option></select></div><div class="setting-row"><span>Frame rate cap</span><select data-setting="fps"><option value="30">30 FPS</option><option value="60" '+(s.fps===60?'selected':'')+'>60 FPS</option><option value="120" '+(s.fps===120?'selected':'')+'>120 FPS</option><option value="0" '+(s.fps===0?'selected':'')+'>Unlimited</option></select></div>'+[['grappleRange','Grapple reach',9,20,.5],['cameraDistance','Camera zoom',5,14,1],['master','Master volume',0,1,.05],['music','Music volume',0,1,.05],['sfx','SFX volume',0,1,.05]].map(x=>'<div class="setting-row"><label for="set-'+x[0]+'">'+x[1]+'</label><input id="set-'+x[0]+'" type="range" min="'+x[2]+'" max="'+x[3]+'" step="'+x[4]+'" value="'+s[x[0]]+'" data-setting="'+x[0]+'"></div>').join('')+'<div class="setting-row"><span>Camera shake</span><input type="checkbox" data-setting="cameraShake" '+(s.cameraShake?'checked':'')+'></div><div class="setting-row"><span>Display</span><button class="small-btn" data-action="fullscreen">TOGGLE FULLSCREEN</button></div><div class="menu-actions"><button class="secondary" data-action="reset-settings">RESTORE DEFAULTS</button><button class="primary" data-action="menu">DONE</button></div></div></section>';
 }
 function hud(){
- app.innerHTML='<div class="hud"><div class="hud-top"><div class="hud-mode" id="hud-mode">STORY · 01</div><div class="hud-time" id="hud-time">0.00</div><button class="hud-pause" data-action="pause" aria-label="Pause">Ⅱ</button></div><div class="hud-bottom"><div id="hud-rope">HOLD CLICK NEAR A RING TO SWING</div><strong id="hud-speed">0m</strong><small><kbd>A</kbd><kbd>D</kbd> MOVE <span>·</span> CLICK HOLD SWING <span>·</span> RELEASE TO FLY</small></div><div class="touch-controls"><button data-control="left" aria-label="Move left">←</button><button data-control="jump">JUMP</button><button data-control="right" aria-label="Move right">→</button></div></div>';
+ app.innerHTML='<div class="hud"><div class="hud-top"><div class="hud-mode" id="hud-mode">STORY · 01</div><div class="hud-time" id="hud-time">0.00</div><button class="hud-pause" data-action="pause" aria-label="Pause">Ⅱ</button></div><div class="hud-bottom"><div id="hud-rope">HOLD ANYWHERE TO AUTO-GRAPPLE</div><strong id="hud-speed">0m</strong><small><kbd>A</kbd><kbd>D</kbd> MOVE <span>·</span> HOLD TO SWING <span>·</span> RELEASE TO FLY</small></div><div class="touch-controls"><button data-control="left" aria-label="Move left">←</button><button data-control="jump">JUMP</button><button data-control="right" aria-label="Move right">→</button></div></div>';
 }
 function modal(title,description,actions){
  const layer=document.createElement('div');layer.className='modal-screen';layer.innerHTML='<div class="panel modal"><div class="eyebrow">SWINGSPHERE</div><h2>'+title+'</h2><p>'+description+'</p><div class="modal-actions">'+actions+'</div></div>';app.append(layer);return layer;
@@ -171,7 +183,7 @@ function claimDaily(){const now=new Date(),today=new Date(now.getFullYear(),now.
 function buy(id){const item=ITEMS.find(i=>i.id===id);if(!item)return;if(save.data.owned.includes(id)){toast('Already owned');return;}if(save.data.coins<item.price){toast('Not enough SwingCoins');return;}modal('CONFIRM PURCHASE','Unlock '+item.name+' for '+item.price+' SwingCoins?','<button class="primary" data-action="confirm-buy" data-id="'+id+'">CONFIRM · ✦ '+item.price+'</button><button class="secondary" data-action="cancel-modal">CANCEL</button>');}
 function confirmBuy(id){const item=ITEMS.find(i=>i.id===id);document.querySelector('.modal-screen')?.remove();if(!item||save.data.owned.includes(id))return;if(!save.spendCoins(item.price)){toast('Not enough SwingCoins');return;}save.own(id);unlock('collector-5');unlock('collector-20');toast(item.name+' unlocked!',true);shop();}
 function equip(id){const item=ITEMS.find(i=>i.id===id);if(!item||!save.data.owned.includes(id))return;save.equip(item.type,id);game.setCosmetic(item);unlock('rainbow');toast(item.name+' equipped',true);if(screen==='locker')locker();else if(screen==='shop')shop();}
-function applySetting(el){const k=el.dataset.setting;if(!k)return;let v=el.type==='checkbox'?el.checked:el.type==='range'?Number(el.value):el.value;if(k==='fps')v=Number(v);save.data.settings[k]=v;save.save();if(k==='quality')game.applyQuality(v);if(k==='fps')game.setFrameRate(v);if(k==='sensitivity')game.sensitivity=v;if(k==='cameraShake')game.cameraShake=v;if(k==='fov'){game.baseFov=v;game.resize();}if(k==='cameraDistance')game.cameraDistance=v;if(['master','music','sfx'].includes(k))audio.setVolumes(save.data.settings.master,save.data.settings.music,save.data.settings.sfx);}
+function applySetting(el){const k=el.dataset.setting;if(!k)return;let v=el.type==='checkbox'?el.checked:el.type==='range'?Number(el.value):el.value;if(k==='fps')v=Number(v);save.data.settings[k]=v;save.save();if(k==='quality')game.applyQuality(v);if(k==='fps')game.setFrameRate(v);if(k==='grappleRange')game.grappleRange=v;if(k==='cameraShake')game.cameraShake=v;if(k==='fov'){game.baseFov=v;game.resize();}if(k==='cameraDistance')game.cameraDistance=v;if(['master','music','sfx'].includes(k))audio.setVolumes(save.data.settings.master,save.data.settings.music,save.data.settings.sfx);}
 app.addEventListener('click',e=>{
  const b=e.target.closest('[data-action]');if(!b)return;audio.play('click');const a=b.dataset.action;
  if(a==='menu')menu();else if(a==='start-quick')start('levels',0);else if(a==='play')levels();else if(a==='levels')levels();else if(a==='locker')locker();else if(a==='shop')shop();else if(a==='achievements')achievements();else if(a==='leaderboards')leaderboards();else if(a==='daily')daily();else if(a==='playtime')playtime();else if(a==='settings')settings();
@@ -224,7 +236,7 @@ function rewardAd(){
 }
 
 async function boot(){
- await platform.init();const cloud=await platform.loadCloud('swingsphere-profile');if(cloud&&cloud.version===1&&Number(cloud.updatedAt)>Number(save.data.updatedAt||0)){try{localStorage.setItem('swingsphere.save.v1',JSON.stringify(cloud));save.data=new SaveManager().data;}catch(e){console.warn('Cloud save could not be restored',e);}}platform.loadingStart();try{const {SwingGame}=await import('./game/SwingGame.js');game=new SwingGame(canvas,{onPause:pause,onComplete:finishLevel,onFail:gameOver,onHUD:updateHUD,onSwing:()=>{audio.play('swing');save.data.stats.swings++;save.save();unlock('first-swing');unlock('swings-50');unlock('swings-200');},onJump:()=>audio.play('jump'),onRelease:()=>audio.play('release'),onLand:()=>audio.play('land'),onRestart:()=>{document.querySelector('.modal-screen')?.remove();game.resume();platform.gameplayStart();},onRunStart:()=>{},onLevel:(L,i)=>{const c=save.data.equipped.color;const item=ITEMS.find(x=>x.id===c);if(item)game.setCosmetic(item);},onMode:()=>{}});await game.init();game.buildLevel(0);const item=ITEMS.find(x=>x.id===save.data.equipped.color);if(item)game.setCosmetic(item);game.applyQuality(save.data.settings.quality);game.setFrameRate(save.data.settings.fps);game.sensitivity=save.data.settings.sensitivity;game.cameraShake=save.data.settings.cameraShake;game.cameraDistance=save.data.settings.cameraDistance;audio.setVolumes(save.data.settings.master,save.data.settings.music,save.data.settings.sfx);platform.loadingStop();menu();setTimeout(()=>loading.classList.add('done'),250);setInterval(()=>{if(screen==='game'&&!document.hidden&&!game.paused&&!game.dead&&!game.completed){
+ await platform.init();const cloud=await platform.loadCloud('swingsphere-profile');if(cloud&&cloud.version===1&&Number(cloud.updatedAt)>Number(save.data.updatedAt||0)){try{localStorage.setItem('swingsphere.save.v1',JSON.stringify(cloud));save.data=new SaveManager().data;}catch(e){console.warn('Cloud save could not be restored',e);}}platform.loadingStart();try{const {SwingGame}=await import('./game/SwingGame.js');game=new SwingGame(canvas,{onPause:pause,onComplete:finishLevel,onFail:gameOver,onHUD:updateHUD,onSwing:()=>{audio.play('swing');save.data.stats.swings++;save.save();unlock('first-swing');unlock('swings-50');unlock('swings-200');},onJump:()=>audio.play('jump'),onRelease:()=>audio.play('release'),onLand:()=>audio.play('land'),onRestart:()=>{document.querySelector('.modal-screen')?.remove();game.resume();platform.gameplayStart();},onRunStart:()=>{},onLevel:(L,i)=>{const c=save.data.equipped.color;const item=ITEMS.find(x=>x.id===c);if(item)game.setCosmetic(item);},onMode:()=>{}});await game.init();game.buildLevel(0);const item=ITEMS.find(x=>x.id===save.data.equipped.color);if(item)game.setCosmetic(item);game.applyQuality(save.data.settings.quality);game.setFrameRate(save.data.settings.fps);game.grappleRange=save.data.settings.grappleRange||15;game.cameraShake=save.data.settings.cameraShake;game.cameraDistance=save.data.settings.cameraDistance;audio.setVolumes(save.data.settings.master,save.data.settings.music,save.data.settings.sfx);platform.loadingStop();menu();setTimeout(()=>loading.classList.add('done'),250);setInterval(()=>{if(screen==='game'&&!document.hidden&&!game.paused&&!game.dead&&!game.completed){
   ensureDailyPlaytime();playSeconds++;save.data.playtime.seconds++;save.data.playtime.dailySeconds++;
   if(playSeconds%15===0){save.save();platform.saveCloud('swingsphere-profile',save.data);}
   unlock('play-10');unlock('play-60');
@@ -233,6 +245,6 @@ function updateHUD(d){
  const t=$('hud-time');if(t)t.textContent=d.time.toFixed(1);
  const m=$('hud-mode');if(m)m.textContent=d.mode==='levels'?'STORY · '+String(game.levelIndex+1).padStart(2,'0'):'ENDLESS';
  const s=$('hud-speed');if(s)s.textContent=Math.floor(d.distance)+'m';
- const r=$('hud-rope');if(r)r.textContent=d.rope?'ROPE ATTACHED · LET GO TO FLY':'HOLD NEAR A RING TO ATTACH';
+ const r=$('hud-rope');if(r)r.textContent=d.rope?'ROPE ATTACHED · RELEASE TO LAUNCH':d.grappleHeld?'SEARCHING FOR NEXT RING':'HOLD ANYWHERE TO AUTO-GRAPPLE';
 }
 boot();
