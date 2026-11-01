@@ -22,6 +22,8 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Build production game
+        env:
+          VITE_CG_LEADERBOARD_ENCRYPTION_KEY: ${{ secrets.VITE_CG_LEADERBOARD_ENCRYPTION_KEY }}
         run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
