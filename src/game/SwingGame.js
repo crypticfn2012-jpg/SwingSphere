@@ -127,20 +127,21 @@ export class SwingGame {
     for(let i=0;i<8;i++)this.generateEndless();this.resetPlayer();this.cb.onMode?.('endless');
   }
   generateEndless(){
-    const i=this.generated++,x=12+i*11.5+rand(-1.2,1.2),y=rand(-.3,2.8)+Math.min(i*.18,9);
-    this.platforms.push({x,y,w:rand(5.5,8),kind:'normal'});
-    const anchorX=x-rand(1,3),anchorY=y+rand(4,6);
+    const i=this.generated++,difficulty=Math.min(1,i/45),x=13+i*14+rand(-.8,.8),y=rand(-.3,2.8)+Math.min(i*.24,12);
+    this.platforms.push({x,y,w:rand(4.2,5.8)-difficulty*.7,kind:'normal'});
+    const anchorX=x-rand(6,7.5),anchorY=y+rand(5.5,7.5)+difficulty;
     this.targets.push({x:anchorX,y:anchorY,type:Math.random()<.13?'boost':'standard',moving:Math.random()<.3,phase:rand(0,6.28),bx:anchorX,by:anchorY});
     if(i>2&&Math.random()<.35)this.hazards.push({x:x-5,y:y+2,r:1.1,phase:rand(0,6.28),bx:x-5});
   }
   buildLava(){
-    this.mode='lava';this.platforms=[{x:0,y:0,w:13,kind:'checkpoint'}];this.targets=[];this.hazards=[];this.generated=0;this.lavaY=-8;this.lavaSpeed=1.55;
+    this.mode='lava';this.platforms=[{x:0,y:0,w:10,kind:'checkpoint'}];this.targets=[];this.hazards=[];this.generated=0;this.lavaY=-8;this.lavaSpeed=1.8;
     for(let i=0;i<10;i++)this.generateLava();this.resetPlayer();this.cb.onMode?.('lava');
   }
   generateLava(){
-    const i=this.generated++,x=9+i*9.2+rand(-1,1),y=2+i*2.8;
-    this.platforms.push({x,y,w:rand(5.5,7.5),kind:'normal'});
-    this.targets.push({x:x-2,y:y+4,type:i%4===0?'boost':'standard',moving:i%3===0,phase:rand(0,6.28),bx:x-2,by:y+4});
+    const i=this.generated++,difficulty=Math.min(1,i/35),x=12+i*12.5+rand(-.7,.7),y=2+i*3.1;
+    this.platforms.push({x,y,w:rand(4.5,6)-difficulty*.6,kind:'normal'});
+    const anchorX=x-6,anchorY=y+5.5+difficulty;
+    this.targets.push({x:anchorX,y:anchorY,type:i%4===0?'boost':'standard',moving:i%3===0,phase:rand(0,6.28),bx:anchorX,by:anchorY});
     if(i%2===1)this.hazards.push({x:x-4,y:y+1.5,r:1,phase:rand(0,6.28),bx:x-4});
   }
   resetPlayer(){
