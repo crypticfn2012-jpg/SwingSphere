@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <meta name="theme-color" content="#080d1b" />
+  <meta name="description" content="SwingSphere — grab the cubes, build momentum and swing your way through the sky." />
+  <title>SwingSphere</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles.css" />
+  <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
+</head>
+<body>
+  <div id="game-root">
+    <canvas id="game-canvas" aria-label="SwingSphere 3D game"></canvas>
+    <div id="loading-screen"><div class="loading-mark">S<span>•</span></div><div class="loading-track"><i></i></div><p>BUILDING YOUR WORLD</p></div>
+    <div id="app"></div>
+    <div id="toast-layer" aria-live="polite"></div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
