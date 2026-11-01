@@ -70,7 +70,7 @@ export class SwingGame{
     this.mode='lava';this.clearCourse();this.lavaY=-12;this.lavaSpeed=1.05;this.lavaZ=0;this.lavaGenerated=9;
     this.addPlatform(0,0,0,13,1,13,'checkpoint');
     for(let i=0;i<9;i++){const z=-14-i*12,x=(Math.random()-.5)*11,y=2+i*3.3;this.addPlatform(x,y,z,7,1,7);this.addTarget(x+(Math.random()-.5)*4,y+4,z+3,i%4===0?'boost':'standard',i%3===0);if(i%2===1)this.addHazard(x,y+1.5,z-3,1.1);}
-    this.lavaMesh=new THREE.Mesh(new THREE.BoxGeometry(100,.5,150),new THREE.MeshStandardMaterial({color:0xff4c1d,emissive:0xff2600,emissiveIntensity:2.1,transparent:true,opacity:.9}));this.lavaMesh.position.set(0,this.lavaY,-50);this.scene.add(this.lavaMesh);
+    this.lavaMesh=new THREE.Mesh(new THREE.BoxGeometry(100,.5,1000),new THREE.MeshStandardMaterial({color:0xff4c1d,emissive:0xff2600,emissiveIntensity:2.1,transparent:true,opacity:.9}));this.lavaMesh.position.set(0,this.lavaY,-300);this.scene.add(this.lavaMesh);
     this.resetPlayer();this.levelLength=1e9;this.cb.onMode?.('lava');
   }
   generateLavaSection(i){
