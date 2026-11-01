@@ -140,16 +140,29 @@ test('holding grapple automatically attaches when a ring enters range',async()=>
   }finally{setup.restore();}
 });
 
-test('later campaign levels narrow platforms to raise difficulty',async()=>{
+test('campaign route widths are not secretly reduced by level number',async()=>{
   const setup=await makeGame();
   try{
     const {game}=setup;
     game.buildLevel(0);
-    const earlyWidth=game.platforms[1].w;
-    game.buildLevel(99);
-    const lateWidth=game.platforms[1].w;
-    assert.ok(lateWidth<earlyWidth,'late route platforms should be narrower');
+    const firstChapterWidth=game.platforms[1].w;
+    game.buildLevel(90);
+    const finalChapterWidth=game.platforms[1].w;
+    assert.equal(finalChapterWidth,firstChapterWidth,'later chapters should not shrink the same authored route');
     assert.ok(game.targets[1].x>0);
+  }finally{setup.restore();}
+});
+
+test('holding right while attached actively builds forward swing speed',async()=>{
+  const setup=await makeGame();
+  try{
+    const {game}=setup;
+    game.buildLevel(0);
+    game.attach();
+    game.keys.KeyD=true;
+    const before=game.player.vx;
+    for(let i=0;i<12;i++)game.update(1/60);
+    assert.ok(game.player.vx>before+2,'pumping the swing should create noticeable forward speed');
   }finally{setup.restore();}
 });
 
