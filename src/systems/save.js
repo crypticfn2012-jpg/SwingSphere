@@ -1,5 +1,5 @@
 const KEY='swingsphere.save.v1';
-const fresh=()=>({version:1,updatedAt:0,coins:450,xp:0,level:1,owned:['color-default','shape-sphere','trail-default'],equipped:{color:'color-default',shape:'shape-sphere',trail:'trail-default'},levels:{},records:{endless:0,lastEndless:0,lava:0},achievements:[],daily:{lastClaim:0,streak:0},playtime:{claimed:[],seconds:0,day:'',dailySeconds:0,dailyClaimed:[]},settings:{quality:'high',fps:60,sensitivity:1,cameraDistance:8,cameraShake:true,fov:75,master:0.8,music:0.45,sfx:0.8},stats:{runs:0,swings:0,falls:0,levels:0,distance:0,coinsEarned:0}});
+const fresh=()=>({version:1,updatedAt:0,coins:450,xp:0,level:1,owned:['color-default','shape-sphere','trail-default'],equipped:{color:'color-default',shape:'shape-sphere',trail:'trail-default'},levels:{},records:{endless:0,lastEndless:0,lava:0},achievements:[],daily:{lastClaim:0,streak:0},playtime:{claimed:[],seconds:0,day:'',dailySeconds:0,dailyClaimed:[]},settings:{quality:'high',fps:60,sensitivity:1,grappleRange:15,cameraDistance:8,cameraShake:true,fov:75,master:0.8,music:0.45,sfx:0.8},stats:{runs:0,swings:0,falls:0,levels:0,distance:0,coinsEarned:0}});
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||0));
 export class SaveManager{
   constructor(){this.data=this.load();}
