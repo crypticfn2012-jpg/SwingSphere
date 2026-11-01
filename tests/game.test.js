@@ -117,3 +117,50 @@ test('endless mode builds a usable chain of swing anchors',async()=>{
     }
   }finally{setup.restore();}
 });
+
+test('grapple target selection ignores cursor aim and chooses a nearby ring',async()=>{
+  const setup=await makeGame();
+  try{
+    const {game}=setup;
+    game.buildLevel(0);
+    game.pointerWorldCache={x:10000,y:10000};
+    assert.equal(game.attach(),true);
+    assert.equal(game.rope.target,game.targets[0]);
+  }finally{setup.restore();}
+});
+
+test('holding grapple automatically attaches when a ring enters range',async()=>{
+  const setup=await makeGame();
+  try{
+    const {game}=setup;
+    game.buildLevel(0);
+    game.pointer.down=true;
+    game.update(.016);
+    assert.ok(game.rope,'holding should acquire the nearest anchor without aiming');
+  }finally{setup.restore();}
+});
+
+test('later campaign levels narrow platforms to raise difficulty',async()=>{
+  const setup=await makeGame();
+  try{
+    const {game}=setup;
+    game.buildLevel(0);
+    const earlyWidth=game.platforms[1].w;
+    game.buildLevel(99);
+    const lateWidth=game.platforms[1].w;
+    assert.ok(lateWidth<earlyWidth,'late route platforms should be narrower');
+    assert.ok(game.targets[1].x>0);
+  }finally{setup.restore();}
+});
+
+test('endless and lava routes leave real gaps for swinging',async()=>{
+  const setup=await makeGame();
+  try{
+    const {game}=setup;
+    game.buildEndless();
+    assert.ok(game.platforms[1].x-game.platforms[0].x>10);
+    game.buildLava();
+    assert.ok(game.platforms[1].x-game.platforms[0].x>10);
+    assert.ok(game.targets[0].y>game.platforms[1].y);
+  }finally{setup.restore();}
+});
