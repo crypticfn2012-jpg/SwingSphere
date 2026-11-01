@@ -69,7 +69,7 @@ export class SwingGame {
     if(!best)return;
     const d=Math.hypot(best.x-this.player.x,best.y-this.player.y);
     const limit=best.type==='limited'?7.5:13.5;if(d>limit)return;
-    this.rope={target:best,length:Math.max(2.2,d*1.02)};
+    this.rope={target:best,length:Math.max(2.2,d*1.02)};this.player.vx+=Math.sign(best.x-this.player.x||1)*2.8;this.player.vy+=1.2;
     if(best.type==='boost'){this.player.vx+=Math.sign(best.x-this.player.x||1)*7;this.player.vy+=7;}
     this.cb.onSwing?.();
     for(let i=0;i<9;i++)this.particle(best.x,best.y,rand(-2,2),rand(-1,3),'#6cf4ff',.45);
@@ -166,12 +166,12 @@ export class SwingGame {
     if(this.mode==='lava'&&this.lavaY>this.maxHeight+15)this.fail();
     if(this.elapsed-this.lastHud>.08){this.lastHud=this.elapsed;this.cb.onHUD?.({time:this.elapsed,speed:Math.hypot(p.vx,p.vy),distance:this.distance,height:this.maxHeight,mode:this.mode,rope:!!this.rope});}
   }
-  get scale(){return Math.min(58,Math.max(34,this.height*.075));}
+  get scale(){const zoom=1+(Number(this.cameraDistance||8)-8)*.018+(Number(this.baseFov||75)-75)*.002;return Math.min(58,Math.max(34,this.height*.075))*zoom;}
   sx(x){return (x-this.cameraX)*this.scale;}
   sy(y){return this.height*.62-(y-this.cameraY)*this.scale;}
   roundRect(x,y,w,h,r,fill,stroke){const c=this.ctx;c.beginPath();c.roundRect(x,y,w,h,r);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=1.5;c.stroke();}}
   draw(){
-    const c=this.ctx,w=this.width,h=this.height,s=this.scale;
+    const c=this.ctx,w=this.width,h=this.height,s=this.scale;c.save();if(this.cameraShake){c.translate(rand(-1.4,1.4),rand(-1,1));}
     const bg=c.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#09142b');bg.addColorStop(.58,'#101f3b');bg.addColorStop(1,'#172746');c.fillStyle=bg;c.fillRect(0,0,w,h);
     for(let layer=0;layer<3;layer++){c.fillStyle=['#142b49','#122541','#0d1c34'][layer];c.beginPath();const base=h*(.76+layer*.1);c.moveTo(0,h);for(let x=0;x<=w+30;x+=30){const yy=base+Math.sin(x*.006+layer*2.2)*h*.045+Math.sin(x*.018+layer)*h*.018;c.lineTo(x,yy);}c.lineTo(w,h);c.fill();}
     for(const st of this.stars){const x=(st.x*w-this.cameraX*s*.035)%w,y=st.y*h;c.globalAlpha=st.a*(.8+.2*Math.sin(this.elapsed+st.p));c.fillStyle='#c8eaff';c.beginPath();c.arc((x+w)%w,y,st.r,0,Math.PI*2);c.fill();}c.globalAlpha=1;
@@ -190,6 +190,7 @@ export class SwingGame {
     for(const q of this.particles){const x=this.sx(q.x),y=this.sy(q.y);c.globalAlpha=clamp(q.life/q.max,0,1);c.fillStyle=q.color;c.beginPath();c.arc(x,y,Math.max(1,4*q.life/q.max),0,Math.PI*2);c.fill();}c.globalAlpha=1;
     this.drawPlayer(c);
     if(this.mode==='levels'){const end=this.platforms[this.platforms.length-1];const x=this.sx(end.x),y=this.sy(end.y);if(x>w*.6){c.globalAlpha=.5;c.fillStyle='#8af8e7';c.font='800 11px sans-serif';c.textAlign='center';c.fillText('FINISH',x,y-30);c.globalAlpha=1;}}
+    c.restore();
   }
   drawPlayer(c){
     const p=this.player,x=this.sx(p.x),y=this.sy(p.y),r=p.r*this.scale;
