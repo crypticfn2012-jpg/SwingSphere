@@ -31,7 +31,7 @@ export class SwingGame {
     const dpr=Math.min(window.devicePixelRatio||1,this.quality==='low'?1:this.quality==='medium'?1.35:1.8);
     this.width=Math.max(1,this.canvas.clientWidth||innerWidth);this.height=Math.max(1,this.canvas.clientHeight||innerHeight);
     this.canvas.width=Math.round(this.width*dpr);this.canvas.height=Math.round(this.height*dpr);
-    this.ctx.setTransform(dpr,0,0,dpr,0,0);
+    this.ctx.setTransform(dpr,0,0,dpr,0,0);if(this.paused)this.pauseNeedsDraw=true;
   }
   setFrameRate(fps){this.maxFPS=Number(fps)||0;}
   applyQuality(q){this.quality=q;this.resize();}
