@@ -57,10 +57,10 @@ export class SwingGame {
   pointerMove(e){this.pointer.x=e.clientX;this.pointer.y=e.clientY;this.pointerWorldCache=this.pointerWorld(e);}
   pointerDown(e){
     if(e.button!==0&&e.pointerType!=='touch')return;
-    this.pointer.down=true;this.canvas.setPointerCapture?.(e.pointerId);this.pointerWorldCache=this.pointerWorld(e);
+    this.pointer.down=true;this.grapplePointerId=e.pointerId;this.canvas.setPointerCapture?.(e.pointerId);this.pointerWorldCache=this.pointerWorld(e);
     if(!this.rope)this.attach();
   }
-  pointerUp(){this.pointer.down=false;if(this.rope)this.release();}
+  pointerUp(e){if(e&&this.grapplePointerId!==undefined&&e.pointerId!==this.grapplePointerId)return;this.pointer.down=false;this.grapplePointerId=undefined;if(this.rope)this.release();}
   attach(){
     if(!this.running||this.paused||this.dead||this.completed)return;
     const p=this.pointerWorldCache;if(!p)return;
