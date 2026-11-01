@@ -47,7 +47,7 @@ const milestoneSkins = [
   ['skin-nightshift','Night Shift',0x8188a8,0]
 ].map(([id,name,color,unlockLevel],index)=>({
   id,type:'color',name,color,price:0,unlockLevel:unlockLevel||undefined,
-  rarity:'MILESTONE'
+  rarity:'MILESTONE',dailyOnly:id==='skin-nightshift'
 }));
 
 export const ITEMS=[...shopSkins,...milestoneSkins];
