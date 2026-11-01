@@ -150,7 +150,7 @@ export class SwingGame {
     }
     if(this.mode==='endless'){
       while(this.generated<200&&this.platforms[this.platforms.length-1].x<this.cameraX+38)this.generateEndless();
-      const cut=this.cameraX-30;this.platforms=this.platforms.filter(q=>q.x+q.w>cut);const oldTargets=this.targets;this.targets=this.targets.filter(t=>t.x>cut);if(this.rope&&!this.targets.includes(this.rope.target))this.release();this.hazards=this.hazards.filter(h=>h.x>cut);
+      const cut=this.cameraX-30;this.platforms=this.platforms.filter(q=>q.x+q.w>cut);this.targets=this.targets.filter(t=>t.x>cut);if(this.rope&&!this.targets.includes(this.rope.target))this.release();this.hazards=this.hazards.filter(h=>h.x>cut);
     }
     if(this.mode==='levels'){
       const end=this.platforms[this.platforms.length-1];
