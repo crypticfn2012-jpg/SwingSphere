@@ -8,6 +8,9 @@ button:disabled{opacity:.42;cursor:not-allowed}
 #app{position:fixed;inset:0;pointer-events:none}
 #app>.screen,#app>.modal-screen{pointer-events:auto}
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;padding:clamp(18px,3.5vw,48px);background:linear-gradient(90deg,rgba(11,16,38,.88) 0%,rgba(11,16,38,.70) 40%,rgba(11,16,38,.16) 100%);animation:fadein .28s ease}
+.home-screen{isolation:isolate;overflow:hidden;background:linear-gradient(90deg,rgba(11,16,38,.98) 0%,rgba(11,16,38,.92) 30%,rgba(11,16,38,.45) 62%,rgba(11,16,38,.16) 100%)}
+.home-screen:before{content:"";position:absolute;inset:0 0 0 auto;width:min(78vw,1180px);z-index:-1;background:url('/SwingSphere/assets/swing-city.svg') 54% center/cover no-repeat;opacity:.94;mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.35) 19%,#000 48%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.35) 19%,#000 48%)}
+
 .screen.hidden{display:none}
 .game-header{display:flex;align-items:center;justify-content:space-between;gap:18px;position:relative;z-index:2}
 .brand-lockup{display:inline-flex;align-items:center;gap:12px;text-decoration:none;color:var(--cream)}
@@ -37,7 +40,7 @@ button:disabled{opacity:.42;cursor:not-allowed}
 .home-hint{margin-top:24px;color:#d6ccd0;font-size:10px;letter-spacing:1.2px;font-weight:700;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .home-hint .key{border:1px solid rgba(255,240,216,.34);border-radius:5px;padding:5px 7px;color:var(--cream);font-size:9px}
 .home-hint i{font-style:normal;color:var(--coral)}
-.home-art-copy{width:min(40vw,480px);height:60%;min-height:250px;position:relative;align-self:center;opacity:.9;pointer-events:none}
+.home-art-copy{width:min(40vw,480px);height:60%;min-height:250px;position:relative;align-self:center;opacity:.6;pointer-events:none}
 .art-orbit{position:absolute;border:1px solid rgba(183,237,201,.32);border-radius:50%;width:78%;height:38%;top:23%;left:5%;transform:rotate(-28deg)}
 .orbit-two{width:70%;height:31%;top:29%;left:10%;border-color:rgba(237,128,108,.35);transform:rotate(48deg)}
 .art-number{position:absolute;top:0;right:8%;font:700 13px 'Space Grotesk';letter-spacing:2px;color:var(--cream)}
