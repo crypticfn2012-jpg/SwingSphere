@@ -209,8 +209,8 @@ export class SwingGame {
   }
   animate(now){
     if(!this.running)return;
-    const raw=Math.min(.04,Math.max(0,(now-this.lastTime)/1000||0));this.lastTime=now;
-    const fps=this.maxFPS;if(!this.paused&&(!fps||now-this.lastRender>=1000/fps)){this.update(raw);this.draw();this.lastRender=now;}
+    const raw=Math.min(.05,Math.max(0,(now-this.lastTime)/1000||0));this.lastTime=now;this.accumulator=(this.accumulator||0)+raw;
+    const fps=this.maxFPS;if(!this.paused&&(!fps||now-this.lastRender>=1000/fps)){const dt=Math.min(.05,this.accumulator);this.accumulator=0;this.update(dt);this.draw();this.lastRender=now;}
     else if(this.paused)this.draw();
     this.raf=requestAnimationFrame(t=>this.animate(t));
   }
