@@ -184,7 +184,7 @@ export class SwingGame {
       if(d>this.rope.length){const nx=dx/d,ny=dy/d;p.x=t.x+nx*this.rope.length;p.y=t.y+ny*this.rope.length;const radial=p.vx*nx+p.vy*ny;if(radial>0){p.vx-=nx*radial;p.vy-=ny*radial;}}
     }
     this.autoTransfer();
-    if(this.pointer.down&&!this.rope&&this.elapsed>.04)this.attach();
+    if(this.pointer.down&&!this.rope)this.attach();
     if(p.y< -24||p.y<this.cameraY-15){this.fail();return;}
     for(const h of this.hazards){const d=Math.hypot(p.x-h.x,p.y-h.y);if(Math.abs(d-h.r)<p.r+.16){this.fail();return;}}
     if(this.mode==='lava'){
