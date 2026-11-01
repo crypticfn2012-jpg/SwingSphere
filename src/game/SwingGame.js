@@ -11,7 +11,7 @@ export class SwingGame {
     this.running=false;this.paused=false;this.mode='levels';this.levelIndex=0;
     this.keys={};this.targets=[];this.platforms=[];this.hazards=[];this.particles=[];this.stars=[];
     this.elapsed=0;this.distance=0;this.maxHeight=0;this.maxFPS=60;this.quality='high';
-    this.sensitivity=1;this.cameraShake=false;this.cameraDistance=8;this.baseFov=75;
+    this.sensitivity=1;this.grappleRange=15;this.cameraShake=false;this.cameraDistance=8;this.baseFov=75;
     this.pointer={x:0,y:0,down:false};this.rope=null;this.trailKind='default';this.cosmetic={color:0x55d9e7,shape:'sphere'};
     this.lastTime=0;this.lastRender=0;this.lastHud=0;this.raf=0;this.pauseNeedsDraw=false;this.accumulator=0;this.ground=false;
     this.onKey=e=>this.key(e,true);this.onKeyUp=e=>this.key(e,false);
@@ -61,32 +61,65 @@ export class SwingGame {
     if(!this.rope)this.attach();
   }
   pointerUp(e){if(e&&this.grapplePointerId!==undefined&&e.pointerId!==this.grapplePointerId)return;this.pointer.down=false;this.grapplePointerId=undefined;if(this.rope)this.release();}
+  findAnchor(maxDistance=this.grappleRange,exclude=null){
+    if(!this.player)return null;
+    const p=this.player;
+    let best=null,bestScore=Infinity;
+    for(const t of this.targets){
+      if(t===exclude)continue;
+      const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);
+      const limit=t.type==='limited'?Math.min(7.5,maxDistance):maxDistance;
+      if(d>limit||dx < -2.5)continue;
+      // Prefer the closest reachable ring, with a small preference for the route ahead.
+      const score=d+(dx<0?4:0)-Math.min(2.2,Math.max(0,dx)*.055);
+      if(score<bestScore){best=t;bestScore=score;}
+    }
+    return best;
+  }
   attach(){
-    if(!this.running||this.paused||this.dead||this.completed)return;
-    const p=this.pointerWorldCache;if(!p)return;
-    let best=null,bd=2.4*(this.sensitivity||1);
-    for(const t of this.targets){const d=Math.hypot(t.x-p.x,t.y-p.y);if(d<bd){bd=d;best=t;}}
-    if(!best)return;
+    if(!this.running||this.paused||this.dead||this.completed||!this.player)return false;
+    const best=this.findAnchor();
+    if(!best)return false;
     const d=Math.hypot(best.x-this.player.x,best.y-this.player.y);
-    const limit=best.type==='limited'?7.5:16;if(d>limit)return;
-    this.rope={target:best,length:Math.max(2.2,d*1.02)};this.player.vx+=Math.sign(best.x-this.player.x||1)*2.8;this.player.vy+=1.2;
-    if(best.type==='boost'){this.player.vx+=Math.sign(best.x-this.player.x||1)*7;this.player.vy+=7;}
+    this.rope={target:best,length:Math.max(2.8,d*1.035)};
+    this.player.vx+=Math.sign(best.x-this.player.x||1)*1.1;
+    if(best.type==='boost'){this.player.vx+=Math.sign(best.x-this.player.x||1)*5;this.player.vy+=4.5;}
     this.cb.onSwing?.();
-    for(let i=0;i<9;i++)this.particle(best.x,best.y,rand(-2,2),rand(-1,3),'#6cf4ff',.45);
+    for(let i=0;i<8;i++)this.particle(best.x,best.y,rand(-2,2),rand(-1,3),'#6cf4ff',.4);
+    return true;
+  }
+  autoTransfer(){
+    if(!this.pointer.down||!this.rope||!this.player)return;
+    const next=this.findAnchor(3.2,this.rope.target);
+    if(!next)return;
+    const d=Math.hypot(next.x-this.player.x,next.y-this.player.y);
+    this.rope={target:next,length:Math.max(2.8,d*1.08)};
+    this.cb.onSwing?.();
+    for(let i=0;i<5;i++)this.particle(next.x,next.y,rand(-1.5,1.5),rand(-1,2),'#b7edc9',.3);
   }
   release(){if(this.rope){this.rope=null;this.cb.onRelease?.();}}
   jump(){
     if(!this.player||!this.ground||this.paused||this.dead)return;
-    this.player.vy=10.8;this.ground=false;this.cb.onJump?.();
+    this.player.vy=9.2;this.ground=false;this.cb.onJump?.();
   }
   mapPlatform(p,i,total){
     return {x:-p[2]*.9,y:p[1]+p[0]*.18,w:Math.max(5,p[5]),kind:i===total-1?'finish':i===0?'checkpoint':'normal'};
   }
   buildLevel(index){
     this.mode='levels';this.levelIndex=clamp(index,0,LEVELS.length-1);const L=LEVELS[this.levelIndex];
-    this.platforms=L.platforms.map((p,i)=>this.mapPlatform(p,i,L.platforms.length));
-    this.targets=L.targets.map((p,i)=>({x:-p[2]*.9,y:p[1]+p[0]*.18,type:this.levelIndex===4&&i===1?'boost':this.levelIndex===6&&i===1?'limited':'standard',moving:this.levelIndex===2&&i===1,phase:rand(0,6.28),bx:-p[2]*.9,by:p[1]+p[0]*.18}));
-    this.hazards=L.obstacles.map(h=>({x:-h[2]*.9,y:h[1]+h[0]*.18,r:Math.max(.75,h[3]*.55),phase:rand(0,6.28),bx:-h[2]*.9}));
+    const difficulty=this.levelIndex/(LEVELS.length-1);
+    const routeStretch=1+difficulty*.13;
+    this.platforms=L.platforms.map((p,i)=>{
+      const q=this.mapPlatform(p,i,L.platforms.length);
+      q.x*=routeStretch;
+      q.w=Math.max(i===0||i===L.platforms.length-1?7.5:3.7,p[5]*(i===0||i===L.platforms.length-1?.78:.62-difficulty*.15));
+      return q;
+    });
+    this.targets=L.targets.map((p,i)=>{
+      const x=-p[2]*.9*routeStretch,y=p[1]+p[0]*.18+difficulty*.65;
+      return {x,y,type:this.levelIndex===4&&i===1?'boost':this.levelIndex===6&&i===1?'limited':'standard',moving:this.levelIndex===2&&i===1,phase:rand(0,6.28),bx:x,by:y};
+    });
+    this.hazards=L.obstacles.map(h=>({x:-h[2]*.9*routeStretch,y:h[1]+h[0]*.18,r:Math.max(.85,h[3]*(.58+difficulty*.1)),phase:rand(0,6.28),bx:-h[2]*.9*routeStretch}));
     this.finishX=this.platforms[this.platforms.length-1].x;this.resetPlayer();this.cb.onLevel?.(L,this.levelIndex);
   }
   buildEndless(){
@@ -124,11 +157,18 @@ export class SwingGame {
     for(const t of this.targets){if(t.moving){t.x=t.bx+Math.sin(this.elapsed*1.5+t.phase)*1.35;t.y=t.by+Math.cos(this.elapsed*1.2+t.phase)*.55;}}
     for(const h of this.hazards){h.x=h.bx+Math.sin(this.elapsed*.9+h.phase)*.85;}
     let dir=0;if(this.keys.KeyD||this.keys.ArrowRight)dir++;if(this.keys.KeyA||this.keys.ArrowLeft)dir--;
-    p.vx+=dir*(this.ground?24:15)*dt;
-    if(this.keys.KeyW||this.keys.ArrowUp)p.vy+=4*dt;
-    if(this.keys.KeyS||this.keys.ArrowDown)p.vy-=4*dt;
+    p.vx+=dir*(this.ground?9:10)*dt;
+    if(this.rope&&dir){
+      const dx=p.x-this.rope.target.x,dy=p.y-this.rope.target.y,d=Math.hypot(dx,dy)||1;
+      const tangentX=-dy/d,tangentY=dx/d;
+      const direction=Math.sign(tangentX||1);
+      p.vx+=tangentX*dir*direction*17*dt;
+      p.vy+=tangentY*dir*direction*17*dt;
+    }
+    if((this.keys.KeyW||this.keys.ArrowUp)&&!this.rope&&this.ground)p.vy+=3*dt;
+    if(this.keys.KeyS||this.keys.ArrowDown)p.vy-=2*dt;
     p.vy-=23*dt;
-    p.vx*=Math.pow(this.ground ? .94 : .997,dt*60);p.vy*=Math.pow(.999,dt*60);
+    p.vx*=Math.pow(this.ground ? .89 : .9985,dt*60);p.vy*=Math.pow(.999,dt*60);
     p.vx=clamp(p.vx,-25,25);p.vy=clamp(p.vy,-28,19);
     p.x+=p.vx*dt;p.y+=p.vy*dt;p.rot+=p.vx*dt*.9;
     this.ground=false;
@@ -142,6 +182,8 @@ export class SwingGame {
       const t=this.rope.target,dx=p.x-t.x,dy=p.y-t.y,d=Math.hypot(dx,dy)||.001;
       if(d>this.rope.length){const nx=dx/d,ny=dy/d;p.x=t.x+nx*this.rope.length;p.y=t.y+ny*this.rope.length;const radial=p.vx*nx+p.vy*ny;if(radial>0){p.vx-=nx*radial;p.vy-=ny*radial;}}
     }
+    this.autoTransfer();
+    if(this.pointer.down&&!this.rope&&this.elapsed>.04)this.attach();
     if(p.y< -24||p.y<this.cameraY-15){this.fail();return;}
     for(const h of this.hazards){const d=Math.hypot(p.x-h.x,p.y-h.y);if(Math.abs(d-h.r)<p.r+.16){this.fail();return;}}
     if(this.mode==='lava'){
@@ -165,7 +207,7 @@ export class SwingGame {
     if(this.trailKind!=='default'&&this.trailClock>.035){this.trailClock=0;const colors={rainbow:['#ff6bb5','#ffd166','#69e7ff','#a78bfa'],fire:['#ff663d','#ffb04a'],ice:['#8beaff','#e9fbff'],lightning:['#a5b4fc','#fef08a'],neon:['#a78bfa','#57e6ef'],stars:['#ffd76b','#fff'],bubbles:['#8beaff','#d6f7ff'],pixel:['#6cf4ff','#b2a4ff'],plasma:['#c084fc','#ff72bd']};const a=colors[this.trailKind]||['#65eaff'];this.particle(p.x-.3,p.y-.1,rand(-1,1),rand(-1,1),a[Math.floor(Math.random()*a.length)],.42);}
     for(const q of this.particles){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy-=3*dt;q.life-=dt;}this.particles=this.particles.filter(q=>q.life>0);
     if(this.mode==='lava'&&this.lavaY>this.maxHeight+15)this.fail();
-    if(this.elapsed-this.lastHud>.08){this.lastHud=this.elapsed;this.cb.onHUD?.({time:this.elapsed,speed:Math.hypot(p.vx,p.vy),distance:this.distance,height:this.maxHeight,mode:this.mode,rope:!!this.rope});}
+    if(this.elapsed-this.lastHud>.08){this.lastHud=this.elapsed;this.cb.onHUD?.({time:this.elapsed,speed:Math.hypot(p.vx,p.vy),distance:this.distance,height:this.maxHeight,mode:this.mode,rope:!!this.rope,grappleHeld:this.pointer.down});}
   }
   get scale(){const zoom=1+(Number(this.cameraDistance||8)-8)*.018+(Number(this.baseFov||75)-75)*.002;return Math.min(58,Math.max(34,this.height*.075))*zoom;}
   sx(x){return (x-this.cameraX)*this.scale;}
