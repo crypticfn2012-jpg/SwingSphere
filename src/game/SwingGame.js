@@ -32,10 +32,10 @@ export class SwingGame{
   pointerDown(e){if(e.button!==0)return;this.pointer(e);this.attach();}
   resize(){if(!this.renderer)return;this.camera.aspect=innerWidth/innerHeight;this.camera.updateProjectionMatrix();this.renderer.setSize(innerWidth,innerHeight);this.renderer.setPixelRatio(Math.min(devicePixelRatio,this.quality==='low'?1:1.7));}
   applyQuality(q){this.quality=q;if(this.renderer){this.renderer.shadowMap.enabled=q!=='low';this.renderer.setPixelRatio(Math.min(devicePixelRatio,q==='low'?1:q==='medium'?1.25:1.7));}}
-  clearCourse(){if(this.lavaMesh){this.scene.remove(this.lavaMesh);this.lavaMesh.geometry.dispose();this.lavaMesh.material.dispose();this.lavaMesh=null;}for(const o of [...this.platforms,...this.targets,...this.hazards]){this.scene.remove(o.mesh);o.mesh.geometry?.dispose();if(Array.isArray(o.mesh.material))o.mesh.material.forEach(m=>m.dispose());else o.mesh.material?.dispose();if(o.body)this.world.removeRigidBody(o.body);}this.platforms=[];this.targets=[];this.hazards=[];this.rope=null;this.ropeLine.visible=false;}
+  clearCourse(){if(this.lavaMesh){this.scene.remove(this.lavaMesh);this.lavaMesh.geometry.dispose();this.lavaMesh.material.dispose();this.lavaMesh=null;}for(const o of [...this.platforms,...this.targets,...this.hazards]){this.scene.remove(o.mesh);o.mesh.traverse(n=>{n.geometry?.dispose();if(Array.isArray(n.material))n.material.forEach(m=>m.dispose());else n.material?.dispose();});if(o.body)this.world.removeRigidBody(o.body);}this.platforms=[];this.targets=[];this.hazards=[];this.rope=null;this.ropeLine.visible=false;}
   addPlatform(x,y,z,w,h,d,kind='normal'){
     const mat=new THREE.MeshStandardMaterial({color:kind==='finish'?0x3ee5cf:kind==='checkpoint'?0x6c8cff:0x273c63,metalness:.35,roughness:.45,emissive:kind==='finish'?0x0b6b64:0x08162d,emissiveIntensity:.7});
-    const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;this.scene.add(mesh);
+    const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;const islandHeight=Math.max(1.8,Math.min(4.5,Math.max(w,d)*.32));const island=new THREE.Mesh(new THREE.ConeGeometry(Math.max(w,d)*.48,islandHeight,7),new THREE.MeshStandardMaterial({color:0x172944,roughness:.9,metalness:.08}));island.rotation.x=Math.PI;island.position.y=-h/2-islandHeight/2+.08;island.castShadow=true;mesh.add(island);const edge=new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry),new THREE.LineBasicMaterial({color:kind==='finish'?0x64fff0:0x5279a9,transparent:true,opacity:.42}));mesh.add(edge);this.scene.add(mesh);
     const body=this.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(x,y,z));this.world.createCollider(RAPIER.ColliderDesc.cuboid(w/2,h/2,d/2),body);
     this.platforms.push({mesh,body,x,y,z,w,h,d,kind});return mesh;
   }
@@ -91,7 +91,7 @@ export class SwingGame{
     }
   }
   resetPlayer(){
-    if(this.playerBody)this.world.removeRigidBody(this.playerBody);if(this.playerMesh)this.scene.remove(this.playerMesh);
+    if(this.playerBody)this.world.removeRigidBody(this.playerBody);if(this.playerMesh){this.scene.remove(this.playerMesh);this.playerMesh.geometry.dispose();this.playerMesh.material.dispose();}
     this.playerBody=this.world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(0,1.8,2).setLinearDamping(.08).setAngularDamping(.5).setCcdEnabled(true));
     this.playerCollider=this.world.createCollider(RAPIER.ColliderDesc.ball(.72).setDensity(1.2).setFriction(.65).setRestitution(.12),this.playerBody);
     this.playerMesh=new THREE.Mesh(new THREE.SphereGeometry(.72,32,24),new THREE.MeshStandardMaterial({color:0x52e3ed,metalness:.35,roughness:.2,emissive:0x0b6975,emissiveIntensity:.5}));this.playerMesh.castShadow=true;this.scene.add(this.playerMesh);
