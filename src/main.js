@@ -8,7 +8,7 @@ import { LeaderboardManager } from './platform/leaderboards.js';
 
 const app=document.querySelector('#app'),canvas=document.querySelector('#game-canvas'),loading=document.querySelector('#loading-screen');
 const save=new SaveManager(),platform=new CrazyGames();
-const leaderboards=new LeaderboardManager(platform);
+const leaderboardManager=new LeaderboardManager(platform);
 const localSave=save.save.bind(save);save.save=()=>{const ok=localSave();platform.saveCloud('swingsphere-profile',save.data);return ok;};
 let game=null,screen='menu',activeMode='levels',hudTimer=null,playSeconds=0,shopTab='color',lockerTab='color';
 const audio=new AudioManager();
@@ -65,7 +65,7 @@ function start(mode,index=0){
  hud();screen='game';game.resume();platform.gameplayStart();
 }
 function finishLevel(result){
- game.pause();platform.gameplayStop();const L=LEVELS[result.level],starsEarned=result.time<=L.par*.82?3:result.time<=L.par*1.18?2:1;const old=save.data.levels[result.level];const reward=120+starsEarned*60+(old?0:80);save.levelResult(result.level,result.time,starsEarned,reward);const totalStars=Object.values(save.data.levels).reduce((n,x)=>n+x.stars,0);leaderboards.submitTotalStars(totalStars);if(starsEarned===3)unlock('three-star');unlock('first-landing');if(Object.keys(save.data.levels).length>=5)unlock('five-levels');if(Object.keys(save.data.levels).length>=10)unlock('ten-levels');if(result.time<=L.par*.82)unlock('speed');if(result.level===9)unlock('ten-levels');platform.happyTime();
+ game.pause();platform.gameplayStop();const L=LEVELS[result.level],starsEarned=result.time<=L.par*.82?3:result.time<=L.par*1.18?2:1;const old=save.data.levels[result.level];const reward=120+starsEarned*60+(old?0:80);save.levelResult(result.level,result.time,starsEarned,reward);const totalStars=Object.values(save.data.levels).reduce((n,x)=>n+x.stars,0);leaderboardManager.submitTotalStars(totalStars);if(starsEarned===3)unlock('three-star');unlock('first-landing');if(Object.keys(save.data.levels).length>=5)unlock('five-levels');if(Object.keys(save.data.levels).length>=10)unlock('ten-levels');if(result.time<=L.par*.82)unlock('speed');if(result.level===9)unlock('ten-levels');platform.happyTime();
  modal('LEVEL COMPLETE',L.name+' finished in '+result.time.toFixed(2)+' seconds. You earned '+starsEarned+' stars, '+reward+' SwingCoins and '+(80+starsEarned*35)+' XP.','<div>'+stars(starsEarned)+'</div><button class="primary" data-action="next-level">NEXT LEVEL →</button><button class="secondary" data-action="restart">REPLAY</button><button class="secondary" data-action="menu">MENU</button>');audio.play('complete');
 }
 function gameOver(result){
