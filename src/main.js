@@ -4,9 +4,11 @@ import { SaveManager } from './systems/save.js';
 import { ITEMS } from './systems/cosmetics.js';
 import { CrazyGames } from './platform/crazygames.js';
 import { AudioManager } from './systems/audio.js';
+import { LeaderboardManager } from './platform/leaderboards.js';
 
 const app=document.querySelector('#app'),canvas=document.querySelector('#game-canvas'),loading=document.querySelector('#loading-screen');
 const save=new SaveManager(),platform=new CrazyGames();
+const leaderboards=new LeaderboardManager(platform);
 let game=null,screen='menu',activeMode='levels',hudTimer=null,playSeconds=0,shopTab='color',lockerTab='color';
 const audio=new AudioManager();
 const $=id=>document.getElementById(id);
@@ -40,7 +42,7 @@ function achievements(){
 }
 function leaderboards(){
  setScreen('leaderboards');const rows=Object.entries(save.data.levels).map(([id,v])=>({name:LEVELS[Number(id)]?.name||'Level',score:v.best})).sort((a,b)=>a.score-b.score);
- app.innerHTML='<section class="screen"><div class="panel panel-wrap"><div class="panel-head"><div><div class="eyebrow">PERSONAL RECORDS</div><h2>Leaderboards</h2></div><button class="secondary" data-action="menu">✕</button></div><p class="muted">These are your saved local records. Global CrazyGames leaderboards need leaderboard IDs to be configured in the developer dashboard; no online rankings are fabricated.</p><div class="cards"><article class="card"><strong>ENDLESS DISTANCE</strong><div class="level-no">'+save.data.records.endless.toFixed(0)+'m</div></article><article class="card"><strong>FLOOR IS LAVA</strong><div class="level-no">'+save.data.records.lava.toFixed(0)+'m</div></article><article class="card"><strong>TOTAL STARS</strong><div class="level-no">'+Object.values(save.data.levels).reduce((n,x)=>n+x.stars,0)+'</div></article></div><h3>Best level times</h3><div class="cards">'+(rows.length?rows.map(r=>'<article class="card"><strong>'+esc(r.name)+'</strong><div class="level-no">'+r.score.toFixed(2)+'s</div></article>').join(''):'<p class="muted">Complete a level to set your first record.</p>')+'</div></div></section>';
+ app.innerHTML='<section class="screen"><div class="panel panel-wrap"><div class="panel-head"><div><div class="eyebrow">PERSONAL RECORDS</div><h2>Leaderboards</h2></div><button class="secondary" data-action="menu">✕</button></div><p class="muted">These are your saved local records. Global CrazyGames leaderboards are invitation-only and currently support one configured board per game. Total Stars submission activates when the portal encryption key is configured; these local records remain available either way.</p><div class="cards"><article class="card"><strong>ENDLESS DISTANCE</strong><div class="level-no">'+save.data.records.endless.toFixed(0)+'m</div></article><article class="card"><strong>FLOOR IS LAVA</strong><div class="level-no">'+save.data.records.lava.toFixed(0)+'m</div></article><article class="card"><strong>TOTAL STARS</strong><div class="level-no">'+Object.values(save.data.levels).reduce((n,x)=>n+x.stars,0)+'</div></article></div><h3>Best level times</h3><div class="cards">'+(rows.length?rows.map(r=>'<article class="card"><strong>'+esc(r.name)+'</strong><div class="level-no">'+r.score.toFixed(2)+'s</div></article>').join(''):'<p class="muted">Complete a level to set your first record.</p>')+'</div></div></section>';
 }
 function daily(){
  setScreen('daily');const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),claimed=save.data.daily.lastClaim>=today;const rewards=[100,150,200,250,300,400,0];
@@ -62,7 +64,7 @@ function start(mode,index=0){
  hud();screen='game';game.resume();platform.gameplayStart();
 }
 function finishLevel(result){
- game.pause();platform.gameplayStop();const L=LEVELS[result.level],starsEarned=result.time<=L.par*.82?3:result.time<=L.par*1.18?2:1;const old=save.data.levels[result.level];const reward=120+starsEarned*60+(old?0:80);save.levelResult(result.level,result.time,starsEarned,reward);if(starsEarned===3)unlock('three-star');unlock('first-landing');if(Object.keys(save.data.levels).length>=5)unlock('five-levels');if(Object.keys(save.data.levels).length>=10)unlock('ten-levels');if(result.time<=L.par*.82)unlock('speed');if(result.level===9)unlock('ten-levels');platform.happyTime();
+ game.pause();platform.gameplayStop();const L=LEVELS[result.level],starsEarned=result.time<=L.par*.82?3:result.time<=L.par*1.18?2:1;const old=save.data.levels[result.level];const reward=120+starsEarned*60+(old?0:80);save.levelResult(result.level,result.time,starsEarned,reward);const totalStars=Object.values(save.data.levels).reduce((n,x)=>n+x.stars,0);leaderboards.submitTotalStars(totalStars);if(starsEarned===3)unlock('three-star');unlock('first-landing');if(Object.keys(save.data.levels).length>=5)unlock('five-levels');if(Object.keys(save.data.levels).length>=10)unlock('ten-levels');if(result.time<=L.par*.82)unlock('speed');if(result.level===9)unlock('ten-levels');platform.happyTime();
  modal('LEVEL COMPLETE',L.name+' finished in '+result.time.toFixed(2)+' seconds. You earned '+starsEarned+' stars, '+reward+' SwingCoins and '+(80+starsEarned*35)+' XP.','<div>'+stars(starsEarned)+'</div><button class="primary" data-action="next-level">NEXT LEVEL →</button><button class="secondary" data-action="restart">REPLAY</button><button class="secondary" data-action="menu">MENU</button>');audio.play('complete');
 }
 function gameOver(result){
