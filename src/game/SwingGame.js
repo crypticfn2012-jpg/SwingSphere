@@ -102,8 +102,7 @@ export class SwingGame{
   attach(){
     if(!this.running||this.dead||this.rope)return;
     const ray=new THREE.Raycaster();ray.setFromCamera(this.mouse,this.camera);const hits=ray.intersectObjects(this.targets.map(t=>t.mesh),false);if(!hits.length)return;
-    const hit=hits[0],p=this.playerBody.translation(),d=Math.hypot(hit.point.x-p.x,hit.point.y-p.y,hit.point.z-p.z);if(d>30||(target.type==='limited'&&d>12))return;
-    const target=this.targets.find(t=>t.mesh===hit.object);if(!target)return;
+    const hit=hits[0],target=this.targets.find(t=>t.mesh===hits[0].object);if(!target)return;const p=this.playerBody.translation(),d=Math.hypot(hit.point.x-p.x,hit.point.y-p.y,hit.point.z-p.z);if(d>30||(target.type==='limited'&&d>12))return;
     this.rope={target,length:Math.max(3,d),point:hit.point.clone()};if(target.type==='boost'){const v=this.playerBody.linvel();this.playerBody.applyImpulse({x:(p.x-target.mesh.position.x)*2,y:5,z:-12},true);}
     this.cb.onSwing?.();
   }
