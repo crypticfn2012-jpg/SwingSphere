@@ -16,7 +16,7 @@ npm run preview
 
 The production files are generated in `dist/`. Upload the contents of that folder to CrazyGames.
 
-A GitHub Actions workflow builds the project on every push to `main` and deploys `dist/` to GitHub Pages. Set the repository's Pages source to **GitHub Actions** in Settings → Pages if it is not already enabled. Once the workflow succeeds, the browser build is available at `https://crypticfn2012-jpg.github.io/SwingSphere/`.
+A GitHub Actions workflow builds the project on every push to `main` and stores the production `dist/` as a Pages artifact. To turn on automatic deployment, first enable GitHub Pages in Settings → Pages and set the source to **GitHub Actions**, then add the repository Actions variable `PAGES_ENABLED=true`. Once the deploy job succeeds, the browser build is available at `https://crypticfn2012-jpg.github.io/SwingSphere/`.
 
 ## Controls
 - **WASD** — steer in the air / move on platforms
