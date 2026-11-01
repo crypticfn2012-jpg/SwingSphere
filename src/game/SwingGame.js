@@ -11,7 +11,7 @@ export class SwingGame {
     this.running=false;this.paused=false;this.mode='levels';this.levelIndex=0;
     this.keys={};this.targets=[];this.platforms=[];this.hazards=[];this.particles=[];this.stars=[];
     this.elapsed=0;this.distance=0;this.maxHeight=0;this.maxFPS=60;this.quality='high';
-    this.sensitivity=1;this.grappleRange=15;this.cameraShake=false;this.cameraDistance=8;this.baseFov=75;
+    this.sensitivity=1;this.grappleRange=18;this.cameraShake=false;this.cameraDistance=8;this.baseFov=75;
     this.pointer={x:0,y:0,down:false};this.rope=null;this.trailKind='default';this.cosmetic={color:0x55d9e7,shape:'sphere'};
     this.lastTime=0;this.lastRender=0;this.lastHud=0;this.raf=0;this.pauseNeedsDraw=false;this.accumulator=0;this.ground=false;
     this.onKey=e=>this.key(e,true);this.onKeyUp=e=>this.key(e,false);
@@ -82,7 +82,7 @@ export class SwingGame {
     if(!best)return false;
     const d=Math.hypot(best.x-this.player.x,best.y-this.player.y);
     this.rope={target:best,length:Math.max(2.8,d*1.035)};
-    this.player.vx+=Math.sign(best.x-this.player.x||1)*1.1;
+    this.player.vx+=Math.sign(best.x-this.player.x||1)*3.4;
     if(best.type==='boost'){this.player.vx+=Math.sign(best.x-this.player.x||1)*5;this.player.vy+=4.5;}
     this.cb.onSwing?.();
     for(let i=0;i<8;i++)this.particle(best.x,best.y,rand(-2,2),rand(-1,3),'#6cf4ff',.4);
@@ -90,7 +90,7 @@ export class SwingGame {
   }
   autoTransfer(){
     if(!this.pointer.down||!this.rope||!this.player)return;
-    const next=this.findAnchor(3.2,this.rope.target);
+    const next=this.findAnchor(7.5,this.rope.target);
     if(!next)return;
     const d=Math.hypot(next.x-this.player.x,next.y-this.player.y);
     this.rope={target:next,length:Math.max(2.8,d*1.08)};
@@ -108,18 +108,18 @@ export class SwingGame {
   buildLevel(index){
     this.mode='levels';this.levelIndex=clamp(index,0,LEVELS.length-1);const L=LEVELS[this.levelIndex];
     const difficulty=this.levelIndex/(LEVELS.length-1);
-    const routeStretch=1+difficulty*.13;
+    const routeStretch=1;
     this.platforms=L.platforms.map((p,i)=>{
       const q=this.mapPlatform(p,i,L.platforms.length);
       q.x*=routeStretch;
-      q.w=Math.max(i===0||i===L.platforms.length-1?7.5:3.7,p[5]*(i===0||i===L.platforms.length-1?.78:.62-difficulty*.15));
+      q.w=Math.max(i===0||i===L.platforms.length-1?9:6,p[5]*.92);
       return q;
     });
     this.targets=L.targets.map((p,i)=>{
-      const x=-p[2]*.9*routeStretch,y=p[1]+p[0]*.18+difficulty*.65;
+      const x=-p[2]*.9*routeStretch,y=p[1]+p[0]*.18;
       return {x,y,type:this.levelIndex===4&&i===1?'boost':this.levelIndex===6&&i===1?'limited':'standard',moving:this.levelIndex===2&&i===1,phase:rand(0,6.28),bx:x,by:y};
     });
-    this.hazards=L.obstacles.map(h=>({x:-h[2]*.9*routeStretch,y:h[1]+h[0]*.18,r:Math.max(.85,h[3]*(.58+difficulty*.1)),phase:rand(0,6.28),bx:-h[2]*.9*routeStretch}));
+    this.hazards=L.obstacles.map(h=>({x:-h[2]*.9*routeStretch,y:h[1]+h[0]*.18,r:Math.max(.7,h[3]*.52),phase:rand(0,6.28),bx:-h[2]*.9*routeStretch}));
     this.finishX=this.platforms[this.platforms.length-1].x;this.resetPlayer();this.cb.onLevel?.(L,this.levelIndex);
   }
   buildEndless(){
@@ -163,14 +163,14 @@ export class SwingGame {
       const dx=p.x-this.rope.target.x,dy=p.y-this.rope.target.y,d=Math.hypot(dx,dy)||1;
       const tangentX=-dy/d,tangentY=dx/d;
       const direction=Math.sign(tangentX||1);
-      p.vx+=tangentX*dir*direction*17*dt;
-      p.vy+=tangentY*dir*direction*17*dt;
+      p.vx+=tangentX*dir*direction*29*dt;
+      p.vy+=tangentY*dir*direction*29*dt;
     }
     if((this.keys.KeyW||this.keys.ArrowUp)&&!this.rope&&this.ground)p.vy+=3*dt;
     if(this.keys.KeyS||this.keys.ArrowDown)p.vy-=2*dt;
-    p.vy-=23*dt;
-    p.vx*=Math.pow(this.ground ? .89 : .9985,dt*60);p.vy*=Math.pow(.999,dt*60);
-    p.vx=clamp(p.vx,-25,25);p.vy=clamp(p.vy,-28,19);
+    p.vy-=17*dt;
+    p.vx*=Math.pow(this.ground ? .92 : .9994,dt*60);p.vy*=Math.pow(.999,dt*60);
+    p.vx=clamp(p.vx,-34,34);p.vy=clamp(p.vy,-30,25);
     p.x+=p.vx*dt;p.y+=p.vy*dt;p.rot+=p.vx*dt*.9;
     this.ground=false;
     for(const q of this.platforms){
