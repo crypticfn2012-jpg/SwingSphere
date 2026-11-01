@@ -66,11 +66,28 @@ export class SwingGame{
     if(i>2&&Math.random()<.48)this.addHazard(x,y+2,z-4,1.2);
   }
   buildLava(){
-    this.mode='lava';this.clearCourse();this.lavaY=-12;this.lavaSpeed=1.05;this.lavaZ=0;
+    this.mode='lava';this.clearCourse();this.lavaY=-12;this.lavaSpeed=1.05;this.lavaZ=0;this.lavaGenerated=9;
     this.addPlatform(0,0,0,13,1,13,'checkpoint');
     for(let i=0;i<9;i++){const z=-14-i*12,x=(Math.random()-.5)*11,y=2+i*3.3;this.addPlatform(x,y,z,7,1,7);this.addTarget(x+(Math.random()-.5)*4,y+4,z+3,i%4===0?'boost':'standard',i%3===0);if(i%2===1)this.addHazard(x,y+1.5,z-3,1.1);}
     this.lavaMesh=new THREE.Mesh(new THREE.BoxGeometry(100,.5,150),new THREE.MeshStandardMaterial({color:0xff4c1d,emissive:0xff2600,emissiveIntensity:2.1,transparent:true,opacity:.9}));this.lavaMesh.position.set(0,this.lavaY,-50);this.scene.add(this.lavaMesh);
     this.resetPlayer();this.levelLength=1e9;this.cb.onMode?.('lava');
+  }
+  generateLavaSection(i){
+    const y=2+i*3.3,z=-14-i*12,x=(Math.random()-.5)*11;
+    this.addPlatform(x,y,z,6.5,1,6.5);
+    this.addTarget(x+(Math.random()-.5)*4,y+4,z+3,i%4===0?'boost':'standard',i%3===0);
+    if(i%2===1)this.addHazard(x,y+1.5,z-3,1.05);
+  }
+  cleanupEndless(playerZ){
+    const cutoff=playerZ+38;
+    for(const key of ['platforms','targets','hazards']){
+      const keep=[];
+      for(const o of this[key]){
+        if(o.mesh.position.z>cutoff){this.scene.remove(o.mesh);if(o.body)this.world.removeRigidBody(o.body);}
+        else keep.push(o);
+      }
+      this[key]=keep;
+    }
   }
   resetPlayer(){
     if(this.playerBody)this.world.removeRigidBody(this.playerBody);if(this.playerMesh)this.scene.remove(this.playerMesh);
@@ -107,7 +124,7 @@ export class SwingGame{
     this.world.step();this.constrainRope();
     const now=this.playerBody.translation();this.playerMesh.position.set(now.x,now.y,now.z);this.playerMesh.rotation.x+=v.z*dt*.4;this.playerMesh.rotation.z-=v.x*dt*.4;
     const speed=Math.hypot(v.x,v.y,v.z);this.distance=Math.max(this.distance,Math.max(0,-now.z));if(this.mode==='lava'){this.lavaY+=this.lavaSpeed*dt;this.lavaMesh.position.y=this.lavaY;this.lavaSpeed+=dt*.012;if(now.y<this.lavaY+1.1){this.fail();return;}}
-    if(this.mode==='endless'){while(-now.z>this.endlessZ+65){this.endlessZ+=17;this.generateEndlessSection(this.endlessZ/17+5);}}
+    if(this.mode==='endless'){while(-now.z>this.endlessZ+65){this.endlessZ+=17;this.generateEndlessSection(this.endlessZ/17+5);}this.cleanupEndless(now.z);}if(this.mode==='lava'){while(now.y>this.lavaGenerated*3.3-10){this.generateLavaSection(this.lavaGenerated++);}}
     if(now.y<-22||Math.abs(now.x)>95||now.z>28){this.fail();return;}
     for(const h of this.hazards){if(h.mesh.position.distanceTo(this.playerMesh.position)<h.r+.65){this.fail();return;}}
     if(this.mode==='levels'){const end=LEVELS[this.levelIndex].platforms.at(-1);if(now.z<end[2]-2&&Math.abs(now.x-end[0])<end[3]/2+1&&now.y<end[1]+4){this.complete();return;}}
