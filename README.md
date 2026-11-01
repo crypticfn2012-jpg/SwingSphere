@@ -31,7 +31,7 @@ The HTML5 SDK v3 is loaded in `index.html`. SDK initialization, lifecycle, cloud
 
 In the CrazyGames submission flow, enable the **Progress Save** toggle so the SDK Data Module is available. The game also keeps a validated local fallback for ordinary browser hosting.
 
-To enable client-side score submission, set `VITE_CG_LEADERBOARD_ENCRYPTION_KEY` to the 32-byte base64 encryption key from the game's CrazyGames Developer Portal before building. Do not commit a private server API key. Verify score submissions in the CrazyGames Preview tool.
+To enable client-side score submission, set `VITE_CG_LEADERBOARD_ENCRYPTION_KEY` to the 32-byte base64 encryption key from the game's CrazyGames Developer Portal before building. For GitHub Pages builds, add it as a repository Actions secret with that exact name. Do not commit a private server API key. Verify score submissions in the CrazyGames Preview tool.
 
 ## Current implementation notes
 Player progress is saved locally with versioned, validated storage. The game is designed to remain playable when the CrazyGames SDK is unavailable. Cloud save, platform leaderboard submission and rewarded ads are guarded behind SDK capability checks and must be verified in the CrazyGames Preview environment before launch.
