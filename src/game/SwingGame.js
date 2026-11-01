@@ -46,7 +46,7 @@ export class SwingGame{
     const halo=new THREE.Mesh(new THREE.TorusGeometry(.82,.035,8,28),new THREE.MeshBasicMaterial({color:c}));mesh.add(halo);halo.rotation.x=Math.PI/2;
     this.targets.push({mesh,base:V(x,y,z),type,moving,phase:Math.random()*6.28});return mesh;
   }
-  addHazard(x,y,z,r=1.5){const mesh=new THREE.Mesh(new THREE.TorusGeometry(r,.22,10,28),new THREE.MeshStandardMaterial({color:0xff526e,emissive:0x8b122e,emissiveIntensity:1.1}));mesh.position.set(x,y,z);mesh.rotation.x=Math.PI/2;this.scene.add(mesh);this.hazards.push({mesh,r});}
+  addHazard(x,y,z,r=1.5){const mesh=new THREE.Mesh(new THREE.TorusGeometry(r,.22,10,28),new THREE.MeshStandardMaterial({color:0xff526e,emissive:0x8b122e,emissiveIntensity:1.1}));mesh.position.set(x,y,z);mesh.rotation.x=Math.PI/2;this.scene.add(mesh);this.hazards.push({mesh,r,base:V(x,y,z),phase:Math.random()*6.28});}
   buildLevel(index){
     this.mode='levels';this.levelIndex=clamp(index,0,9);this.clearCourse();const L=LEVELS[this.levelIndex];
     L.platforms.forEach((p,i)=>this.addPlatform(p[0],p[1],p[2],p[3],p[4],p[5],i===L.platforms.length-1?'finish':i===0?'checkpoint':'normal'));
@@ -95,20 +95,20 @@ export class SwingGame{
     this.playerBody=this.world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(0,1.8,2).setLinearDamping(.08).setAngularDamping(.5).setCcdEnabled(true));
     this.playerCollider=this.world.createCollider(RAPIER.ColliderDesc.ball(.72).setDensity(1.2).setFriction(.65).setRestitution(.12),this.playerBody);
     this.playerMesh=new THREE.Mesh(new THREE.SphereGeometry(.72,32,24),new THREE.MeshStandardMaterial({color:0x52e3ed,metalness:.35,roughness:.2,emissive:0x0b6975,emissiveIntensity:.5}));this.playerMesh.castShadow=true;this.scene.add(this.playerMesh);
-    this.elapsed=0;this.distance=0;this.dead=false;this.completed=false;this.jumpReady=true;this.trail=[];
+    this.elapsed=0;this.distance=0;this.maxHeight=1.8;this.dead=false;this.completed=false;this.jumpReady=true;this.trail=[];
     this.camera.position.set(0,5,12);this.camera.lookAt(0,1,0);this.cb.onRunStart?.();
   }
   setCosmetic(item){if(!this.playerMesh||!item)return;if(item.type==='color'){this.rainbowSkin=item.id==='color-rainbow';this.playerMesh.material.color.set(item.color);this.playerMesh.material.emissive.set(item.color);this.playerMesh.material.emissiveIntensity=this.rainbowSkin?.8:.35;}if(item.type==='trail'){this.trailKind=item.id.replace('trail-','');}if(item.type==='shape'){const old=this.playerMesh.geometry;let g;if(item.id==='shape-cube')g=new THREE.BoxGeometry(1.12,1.12,1.12);else if(item.id==='shape-rounded-cube')g=new RoundedBoxGeometry(1.12,1.12,1.12,4,.12);else if(item.id==='shape-diamond'||item.id==='shape-octahedron')g=new THREE.OctahedronGeometry(.9);else if(item.id==='shape-hexagon')g=new THREE.CylinderGeometry(.72,.72,.95,6);else if(item.id==='shape-crystal')g=new THREE.IcosahedronGeometry(.85,1);else if(item.id==='shape-star'||item.id==='shape-heart'){const s=new THREE.Shape();if(item.id==='shape-star'){for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,r=i%2?.38:.85,x=Math.cos(a)*r,y=Math.sin(a)*r;i?s.lineTo(x,y):s.moveTo(x,y);}s.closePath();}else{s.moveTo(0,-.65);s.bezierCurveTo(-1.2,.05,-.65,1.1,0,.48);s.bezierCurveTo(.65,1.1,1.2,.05,0,-.65);}g=new THREE.ExtrudeGeometry(s,{depth:.28,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.06,bevelThickness:.06});g.center();}else if(item.id==='shape-neon-sphere')g=new THREE.SphereGeometry(.72,24,18);else g=new THREE.SphereGeometry(.72,32,24);this.playerMesh.geometry=g;old.dispose();if(this.playerCollider&&this.playerBody){this.world.removeCollider(this.playerCollider,true);const desc=item.id==='shape-cube'||item.id==='shape-rounded-cube'?RAPIER.ColliderDesc.cuboid(.62,.62,.62):RAPIER.ColliderDesc.ball(.72);this.playerCollider=this.world.createCollider(desc.setDensity(1.2).setFriction(.65).setRestitution(.12),this.playerBody);}}}
   attach(){
     if(!this.running||this.dead||this.rope)return;
     const ray=new THREE.Raycaster();ray.setFromCamera(this.mouse,this.camera);const hits=ray.intersectObjects(this.targets.map(t=>t.mesh),false);if(!hits.length)return;
-    const hit=hits[0],p=this.playerBody.translation(),d=Math.hypot(hit.point.x-p.x,hit.point.y-p.y,hit.point.z-p.z);if(d>30)return;
+    const hit=hits[0],p=this.playerBody.translation(),d=Math.hypot(hit.point.x-p.x,hit.point.y-p.y,hit.point.z-p.z);if(d>30||(target.type==='limited'&&d>12))return;
     const target=this.targets.find(t=>t.mesh===hit.object);if(!target)return;
     this.rope={target,length:Math.max(3,d),point:hit.point.clone()};if(target.type==='boost'){const v=this.playerBody.linvel();this.playerBody.applyImpulse({x:(p.x-target.mesh.position.x)*2,y:5,z:-12},true);}
     this.cb.onSwing?.();
   }
   release(){if(this.rope){this.rope=null;this.ropeLine.visible=false;this.cb.onRelease?.();}}
-  jump(){if(!this.playerBody||this.dead||!this.jumpReady)return;const p=this.playerBody.translation();const grounded=this.platforms.some(q=>Math.abs(p.x-q.x)<q.w/2+.6&&Math.abs(p.z-q.z)<q.d/2+.6&&p.y>q.y&&p.y<q.y+2.1);if(grounded){this.playerBody.applyImpulse({x:0,y:8.8,z:0},true);this.jumpReady=false;setTimeout(()=>this.jumpReady=true,250);}}
+  jump(){if(!this.playerBody||this.dead||!this.jumpReady)return;const p=this.playerBody.translation();const grounded=this.platforms.some(q=>Math.abs(p.x-q.x)<q.w/2+.6&&Math.abs(p.z-q.z)<q.d/2+.6&&p.y>q.y&&p.y<q.y+2.1);if(grounded){this.playerBody.applyImpulse({x:0,y:8.8,z:0},true);this.cb.onJump?.();this.jumpReady=false;setTimeout(()=>this.jumpReady=true,250);}}
   constrainRope(){
     if(!this.rope)return;const t=this.rope.target.mesh.position,p=this.playerBody.translation();const dx=p.x-t.x,dy=p.y-t.y,dz=p.z-t.z;const d=Math.hypot(dx,dy,dz)||.001;if(d<=this.rope.length)return;
     const nx=dx/d,ny=dy/d,nz=dz/d;const excess=d-this.rope.length;
@@ -124,10 +124,10 @@ export class SwingGame{
     for(const target of this.targets){if(target.moving){target.mesh.position.x=target.base.x+Math.sin(this.elapsed*1.5+target.phase)*2;target.mesh.position.y=target.base.y+Math.cos(this.elapsed*1.2+target.phase)*.8;}}if(this.rope){const target=this.rope.target;this.rope.point.copy(target.mesh.position);}
     this.world.step();this.constrainRope();
     const now=this.playerBody.translation();this.playerMesh.position.set(now.x,now.y,now.z);this.playerMesh.rotation.x+=v.z*dt*.4;this.playerMesh.rotation.z-=v.x*dt*.4;
-    const speed=Math.hypot(v.x,v.y,v.z);this.distance=Math.max(this.distance,Math.max(0,-now.z));if(this.mode==='lava'){this.lavaY+=this.lavaSpeed*dt;this.lavaMesh.position.y=this.lavaY;this.lavaSpeed+=dt*.012;if(now.y<this.lavaY+1.1){this.fail();return;}}
+    const speed=Math.hypot(v.x,v.y,v.z);this.maxHeight=Math.max(this.maxHeight,now.y);this.distance=Math.max(this.distance,Math.max(0,-now.z));if(this.mode==='lava'){this.lavaY+=this.lavaSpeed*dt;this.lavaMesh.position.y=this.lavaY;this.lavaSpeed+=dt*.012;if(now.y<this.lavaY+1.1){this.fail();return;}}
     if(this.mode==='endless'){while(-now.z>this.endlessZ+65){this.endlessZ+=17;this.generateEndlessSection(this.endlessZ/17+5);}this.cleanupEndless(now.z);}if(this.mode==='lava'){while(now.y>this.lavaGenerated*3.3-10){this.generateLavaSection(this.lavaGenerated++);}}
     if(now.y<-22||Math.abs(now.x)>95||now.z>28){this.fail();return;}
-    for(const h of this.hazards){if(h.mesh.position.distanceTo(this.playerMesh.position)<h.r+.65){this.fail();return;}}
+    for(const h of this.hazards){h.mesh.rotation.z+=dt*1.35;h.mesh.position.x=h.base.x+Math.sin(this.elapsed*.9+h.phase)*1.25;if(h.mesh.position.distanceTo(this.playerMesh.position)<h.r+.65){this.fail();return;}}
     if(this.mode==='levels'){const end=LEVELS[this.levelIndex].platforms.at(-1);if(now.z<end[2]-2&&Math.abs(now.x-end[0])<end[3]/2+1&&now.y<end[1]+4){this.complete();return;}}
     const cameraDistance=this.cameraDistance||8;const desired=V(now.x*.48+this.camera.position.x*.52,now.y+cameraDistance*.58,now.z+cameraDistance*1.28);this.camera.position.lerp(desired,1-Math.pow(.001,dt));this.camera.lookAt(now.x,now.y+.6,now.z-3);if(this.cameraShake&&speed>18){this.camera.position.x+=(Math.random()-.5)*.035;this.camera.position.y+=(Math.random()-.5)*.025;}const baseFov=this.baseFov||75;this.camera.fov=THREE.MathUtils.lerp(this.camera.fov,clamp(baseFov+Math.max(0,speed-12)*.48,baseFov,105),Math.min(1,dt*3));this.camera.updateProjectionMatrix();
     this.ropeLine.visible=!!this.rope;if(this.rope){const a=this.playerMesh.position,b=this.rope.target.mesh.position;const attr=this.ropeLine.geometry.attributes.position;attr.setXYZ(0,a.x,a.y,a.z);attr.setXYZ(1,b.x,b.y,b.z);attr.needsUpdate=true;}
@@ -136,7 +136,7 @@ export class SwingGame{
     this.cb.onHUD?.({time:this.elapsed,speed,distance:this.distance,height:Math.max(0,now.y),rope:!!this.rope,mode:this.mode});
   }
   complete(){if(this.completed||this.dead)return;this.completed=true;this.release();this.cb.onComplete?.({time:this.elapsed,distance:this.distance,level:this.levelIndex});}
-  fail(){if(this.dead||this.completed)return;this.dead=true;this.release();this.cb.onFail?.({time:this.elapsed,distance:this.distance,height:Math.max(0,this.playerBody.translation().y),mode:this.mode});}
+  fail(){if(this.dead||this.completed)return;this.dead=true;this.release();this.cb.onFail?.({time:this.elapsed,distance:this.distance,height:Math.max(0,this.maxHeight),mode:this.mode});}
   restart(){if(this.mode==='levels')this.buildLevel(this.levelIndex);else if(this.mode==='endless')this.buildEndless();else this.buildLava();}
   animate(time){if(!this.running)return;if(this.maxFPS>0&&time-this.lastRender<1000/this.maxFPS){requestAnimationFrame(t=>this.animate(t));return;}this.lastRender=time;const dt=Math.min((time-this.lastTime)/1000||0,.05);this.lastTime=time;if(!this.paused){this.accumulator+=dt;while(this.accumulator>=this.fixed){this.update(this.fixed);this.accumulator-=this.fixed;}}this.renderer.render(this.scene,this.camera);requestAnimationFrame(t=>this.animate(t));}
   pause(){this.paused=true;}
