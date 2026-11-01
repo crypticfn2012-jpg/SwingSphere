@@ -67,7 +67,7 @@ function levels(){
    return '<button class="road-node '+status+(local===9?' milestone':'')+'" style="grid-column:'+col+';grid-row:'+row+'" data-action="start-level" data-level="'+i+'" '+(unlocked||record?'':'disabled')+' title="Level '+(i+1)+' · '+esc(LEVELS[i].name)+'"><span>'+String(i+1).padStart(2,'0')+'</span>'+(record?'<small>✓</small>':'')+'</button>';
   }).join('');
   const rewardOwned=skin&&save.data.owned.includes(skin.id);
-  return '<section class="chapter-block"><header class="chapter-title"><div><small>CHAPTER '+String(chapter+1).padStart(2,'0')+'</small><h3>'+chapterNames[chapter]+'</h3></div><div class="chapter-reward"><span class="skin-dot" style="--skin:'+((skin?.color||0x55d8e8).toString(16).padStart(6,'0'))+'"></span><span>'+((rewardOwned)?'SKIN UNLOCKED':'SKIN AT LEVEL '+to)+'</span></div></header><div class="chapter-path"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M10 25 H90 V75 H10"/></svg>'+nodes+'</div></section>';
+  return '<section class="chapter-block"><header class="chapter-title"><div><small>CHAPTER '+String(chapter+1).padStart(2,'0')+'</small><h3>'+chapterNames[chapter]+'</h3></div><div class="chapter-reward"><span class="skin-dot" style="--skin:#'+((skin?.color||0x55d8e8).toString(16).padStart(6,'0'))+'"'></span><span>'+((rewardOwned)?'SKIN UNLOCKED':'SKIN AT LEVEL '+to)+'</span></div></header><div class="chapter-path"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M10 25 H90 V75 H10"/></svg>'+nodes+'</div></section>';
  }).join('');
  app.innerHTML='<section class="screen sub-screen"><div class="sub-top"><button class="back-button" data-action="menu">← BACK</button><div class="sub-heading"><small>STORY MODE</small><h2>THE ROAD AHEAD</h2><p>'+completedCount+' / '+LEVELS.length+' levels complete</p></div><div class="progress-count">'+Math.round(completedCount/LEVELS.length*100)+'%</div></div><div class="road-scroll">'+chapters+'</div></section>';
 }
@@ -180,7 +180,7 @@ app.addEventListener('click',e=>{
  else if(a==='restart'){document.querySelector('.modal-screen')?.remove();start(activeMode,game.levelIndex);}
  else if(a==='next-level'){document.querySelector('.modal-screen')?.remove();start('levels',Math.min(LEVELS.length-1,game.levelIndex+1));}
  else if(a==='shop-tab'){shopTab=b.dataset.tab;shop();}else if(a==='locker-tab'){lockerTab=b.dataset.tab;locker();}
- else if(a==='noop'){}else if(a==='buy')buy(b.dataset.id);else if(a==='confirm-buy')confirmBuy(b.dataset.id);else if(a==='cancel-modal')document.querySelector('.modal-screen')?.remove();else if(a==='equip')equip(b.dataset.id);else if(a==='shop')shop();else if(a==='claim-daily')claimDaily();else if(a==='claim-playtime')claimPlaytime(Number(b.dataset.seconds));else if(a==='reward-ad')rewardAd();
+ else if(a==='noop'){}else if(a==='buy')buy(b.dataset.id);else if(a==='confirm-buy')confirmBuy(b.dataset.id);else if(a==='cancel-modal')document.querySelector('.modal-screen')?.remove();else if(a==='equip')equip(b.dataset.id);else if(a==='claim-daily')claimDaily();else if(a==='claim-playtime')claimPlaytime(Number(b.dataset.seconds));else if(a==='reward-ad')rewardAd();
  else if(a==='reset-settings'){save.data.settings={...new SaveManager().data.settings};save.save();settings();}
 });
 app.addEventListener('change',e=>{if(e.target.dataset.setting)applySetting(e.target);});
