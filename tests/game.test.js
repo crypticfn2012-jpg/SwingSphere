@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { SwingGame } from '../src/game/SwingGame.js';
 import { LEVELS } from '../src/game/level-data.js';
+import { ITEMS } from '../src/systems/cosmetics.js';
 
 function makeContext(){
   const gradient={addColorStop(){}};
@@ -94,5 +95,25 @@ test('holding on an anchor attaches the ball to the rope',async()=>{
     game.pointerWorldCache={x:anchor.x,y:anchor.y};
     game.attach();
     assert.equal(game.rope?.target,anchor);
+  }finally{setup.restore();}
+});
+
+test('every tenth story level grants a distinct ball skin',()=>{
+  const rewards=ITEMS.filter(item=>Number.isInteger(item.unlockLevel)&&item.unlockLevel>0);
+  assert.deepEqual(rewards.map(item=>item.unlockLevel),[10,20,30,40,50,60,70,80,90,100]);
+  assert.ok(rewards.every(item=>item.type==='color'&&item.price===0));
+});
+
+test('endless mode builds a usable chain of swing anchors',async()=>{
+  const setup=await makeGame();
+  try{
+    const {game}=setup;
+    game.buildEndless();
+    assert.equal(game.mode,'endless');
+    assert.ok(game.targets.length>=8);
+    for(const anchor of game.targets){
+      assert.equal(anchor.x,anchor.bx);
+      assert.equal(anchor.y,anchor.by);
+    }
   }finally{setup.restore();}
 });
