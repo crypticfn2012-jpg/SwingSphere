@@ -127,14 +127,14 @@ export class SwingGame {
     if(this.keys.KeyW||this.keys.ArrowUp)p.vy+=4*dt;
     if(this.keys.KeyS||this.keys.ArrowDown)p.vy-=4*dt;
     p.vy-=23*dt;
-    p.vx*=Math.pow(this.ground ? .80 : .997,dt*60);p.vy*=Math.pow(.999,dt*60);
+    p.vx*=Math.pow(this.ground ? .94 : .997,dt*60);p.vy*=Math.pow(.999,dt*60);
     p.vx=clamp(p.vx,-25,25);p.vy=clamp(p.vy,-28,19);
     p.x+=p.vx*dt;p.y+=p.vy*dt;p.rot+=p.vx*dt*.9;
     this.ground=false;
     for(const q of this.platforms){
       const left=q.x-q.w/2,right=q.x+q.w/2;
       if(p.x+p.r>left&&p.x-p.r<right&&prevY>=q.y+p.r-.12&&p.y<=q.y+p.r&&p.vy<=0){
-        p.y=q.y+p.r;p.vy=0;if(!wasGround)this.cb.onLand?.();this.ground=true;
+        p.y=q.y+p.r;p.vy=0;if(!wasGround){this.cb.onLand?.();for(let i=0;i<7;i++)this.particle(p.x+rand(-.4,.4),q.y+.1,rand(-2,2),rand(.5,2),'#8deaff',.28);}this.ground=true;
       }
     }
     if(this.rope){
@@ -150,7 +150,7 @@ export class SwingGame {
     }
     if(this.mode==='endless'){
       while(this.generated<200&&this.platforms[this.platforms.length-1].x<this.cameraX+38)this.generateEndless();
-      const cut=this.cameraX-30;this.platforms=this.platforms.filter(q=>q.x+q.w>cut);this.targets=this.targets.filter(t=>t.x>cut);this.hazards=this.hazards.filter(h=>h.x>cut);
+      const cut=this.cameraX-30;this.platforms=this.platforms.filter(q=>q.x+q.w>cut);const oldTargets=this.targets;this.targets=this.targets.filter(t=>t.x>cut);if(this.rope&&!this.targets.includes(this.rope.target))this.release();this.hazards=this.hazards.filter(h=>h.x>cut);
     }
     if(this.mode==='levels'){
       const end=this.platforms[this.platforms.length-1];
