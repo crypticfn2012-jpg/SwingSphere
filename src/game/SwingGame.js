@@ -64,7 +64,7 @@ export class SwingGame {
   attach(){
     if(!this.running||this.paused||this.dead||this.completed)return;
     const p=this.pointerWorldCache;if(!p)return;
-    let best=null,bd=1.9;
+    let best=null,bd=1.9*(this.sensitivity||1);
     for(const t of this.targets){const d=Math.hypot(t.x-p.x,t.y-p.y);if(d<bd){bd=d;best=t;}}
     if(!best)return;
     const d=Math.hypot(best.x-this.player.x,best.y-this.player.y);
