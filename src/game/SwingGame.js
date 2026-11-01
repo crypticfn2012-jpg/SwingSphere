@@ -84,7 +84,7 @@ export class SwingGame{
     for(const key of ['platforms','targets','hazards']){
       const keep=[];
       for(const o of this[key]){
-        if(o.mesh.position.z>cutoff){this.scene.remove(o.mesh);o.mesh.geometry?.dispose();if(Array.isArray(o.mesh.material))o.mesh.material.forEach(m=>m.dispose());else o.mesh.material?.dispose();if(o.body)this.world.removeRigidBody(o.body);}
+        if(o.mesh.position.z>cutoff){this.scene.remove(o.mesh);o.mesh.traverse(n=>{n.geometry?.dispose();if(Array.isArray(n.material))n.material.forEach(m=>m.dispose());else n.material?.dispose();});if(o.body)this.world.removeRigidBody(o.body);}
         else keep.push(o);
       }
       this[key]=keep;
