@@ -1,0 +1,5 @@
+export const ITEMS=[
+...['red','blue','green','yellow','orange','purple','pink','cyan','white','black','silver','gold','lime','magenta','turquoise','navy','coral','mint','violet','rainbow'].map((c,i)=>({id:'color-'+c,type:'color',name:c[0].toUpperCase()+c.slice(1),rarity:i>16?'LEGENDARY':i>12?'EPIC':i>7?'RARE':'COMMON',price:i===0?0:100+i*90,color:c==='rainbow'?0xffffff:['red','blue','green','yellow','orange','purple','pink','cyan','white','black','silver','gold','lime','magenta','turquoise','navy','coral','mint','violet'][i]||0x56dce9})),
+...['sphere','cube','rounded-cube','diamond','hexagon','crystal','star','heart','octahedron','neon-sphere'].map((s,i)=>({id:'shape-'+s,type:'shape',name:s.replaceAll('-',' ').replace(/\b\w/g,c=>c.toUpperCase()),rarity:i>7?'LEGENDARY':i>4?'EPIC':i>2?'RARE':'UNCOMMON',price:i===0?0:350+i*170})),
+...['default','rainbow','fire','ice','lightning','neon','stars','bubbles','pixel','plasma'].map((s,i)=>({id:'trail-'+s,type:'trail',name:s[0].toUpperCase()+s.slice(1),rarity:i>7?'LEGENDARY':i>4?'EPIC':i>2?'RARE':'COMMON',price:i===0?0:220+i*120}))
+];
