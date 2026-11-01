@@ -25,44 +25,12 @@ function menu(){
  const completed=Object.keys(save.data.levels).length;
  const next=Array.from({length:LEVELS.length},(_,i)=>i).find(i=>!save.data.levels[i])??LEVELS.length-1;
  const pct=Math.round(completed/LEVELS.length*100);
- app.innerHTML=`<section class="screen title-screen">
-  <header class="title-header">
-   <div class="game-logo">SWING<span>SPHERE</span><small> A PHYSICS PLATFORMER</small></div>
-   <nav class="title-nav">
-    <button data-action="locker">LOCKER</button>
-    <button data-action="shop">SKIN SHOP</button>
-    <button data-action="playtime">DAILY REWARDS</button>
-    <button data-action="settings" aria-label="Settings">SETTINGS ⚙</button>
-   </nav>
-  </header>
-  <main class="menu-layout">
-   <div class="menu-copy">
-    <div class="title-kicker">FIND YOUR MOMENTUM</div>
-    <h1>LET GO.<br><span>FLY FURTHER.</span></h1>
-    <p class="title-subtitle">One ball. One rope. A lot of bad landings.</p>
-    <div class="title-buttons">
-     <button class="play-button story-button" data-action="levels"><span>${completed?'CONTINUE STORY':'START STORY'}</span><b>↗</b></button>
-     <button class="play-button endless-button" data-action="endless"><span>ENDLESS RUN</span><b>∞</b></button>
-    </div>
-    <div class="menu-progress">
-     <div class="menu-progress-head"><span>YOUR STORY</span><b>${completed} / ${LEVELS.length}</b></div>
-     <div class="menu-progress-track"><i style="width:${pct}%"></i></div>
-     <small>${pct}% COMPLETE · NEXT UP: ${esc(LEVELS[next].name.toUpperCase())}</small>
-    </div>
-   </div>
-   <div class="menu-art" aria-hidden="true">
-    <div class="menu-rope"></div><div class="menu-anchor"></div>
-    <div class="menu-ball"></div>
-    <span class="menu-art-label">HOLD TO GRAPPLE <i>↗</i></span>
-   </div>
-  </main>
-  <footer class="title-footer">
-   <div class="menu-stat"><small>ENDLESS BEST</small><strong>${best}<i>m</i></strong></div>
-   <div class="menu-stat"><small>LAST RUN</small><strong>${last}<i>m</i></strong></div>
-   <div class="menu-stat"><small>PLAYED TODAY</small><strong>${Math.floor(dailySeconds/60)}<i>min</i></strong></div>
-   <div class="menu-hint">HOLD ANYWHERE TO AUTO-GRAPPLE THE NEAREST RING</div>
-  </footer>
- </section>`;
+ app.innerHTML=`<section class="screen title-screen"><header class="title-header"><div class="game-logo">swing<span>sphere</span><small>PHYSICS ARCADE</small></div><nav class="title-nav"><button data-action="locker">LOCKER</button><button data-action="shop">SHOP</button><button data-action="playtime">REWARDS</button><button data-action="settings">SETTINGS</button></nav></header>
+ <main class="menu-layout"><div class="menu-copy"><div class="title-kicker">A LITTLE GAME ABOUT MOMENTUM</div><h1>SWING.<br><span>RELEASE.</span></h1><p class="title-subtitle">Hold to catch a ring. Pump your swing. Let go at the right moment.</p>
+ <div class="title-buttons"><button class="play-button story-button" data-action="levels"><span>${completed?'CONTINUE':'PLAY STORY'}</span><b>→</b></button><button class="play-button endless-button" data-action="endless"><span>ENDLESS</span><b>∞</b></button></div>
+ <div class="menu-progress"><div class="menu-progress-head"><span>STORY PROGRESS</span><b>${completed} / ${LEVELS.length}</b></div><div class="menu-progress-track"><i style="width:${pct}%"></i></div><small>NEXT: ${esc(LEVELS[next].name.toUpperCase())}</small></div></div>
+ <aside class="menu-side"><div class="menu-side-label">YOUR RECORDS</div><div class="menu-record"><span>ENDLESS BEST</span><strong>${best}<small>m</small></strong></div><div class="menu-record"><span>LAST RUN</span><strong>${last}<small>m</small></strong></div><div class="menu-record"><span>PLAYED TODAY</span><strong>${Math.floor(dailySeconds/60)}<small>min</small></strong></div><div class="menu-side-foot">TIP 01 <span>Hold anywhere to grab the nearest ring.</span></div></aside></main>
+ <footer class="title-footer"><span>STORY MODE · 100 LEVELS</span><span>BUILT AROUND THE SWING</span><span>NO RUSH. FIND YOUR RHYTHM.</span></footer></section>`;
 }
 function levels(){
  setScreen('levels');
