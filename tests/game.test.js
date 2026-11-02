@@ -7,7 +7,8 @@ import { ITEMS } from '../src/systems/cosmetics.js';
 function makeContext(){
   const gradient={addColorStop(){}};
   return new Proxy({
-    createLinearGradient(){return gradient;}
+    createLinearGradient(){return gradient;},
+    createRadialGradient(){return gradient;}
   },{
     get(target,key){
       if(key in target)return target[key];
